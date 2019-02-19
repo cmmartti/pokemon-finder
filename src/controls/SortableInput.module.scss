@@ -1,0 +1,149 @@
+@import 'shared';
+
+.sortable-input {
+    // Theme colours
+    --si-text-color: #{$grey-9};
+    --si-button-color: #{$grey-6};
+    --si-background-color: #{$grey-2};
+    --si-focus-outline-color: #{$grey-6};
+    --si-option-background-color: #{$grey-4};
+
+    display: grid;
+    grid-template:
+        'items button'
+        'menu  menu'
+        / 1fr auto;
+    align-items: stretch;
+
+    .items-list {
+        grid-area: items;
+        overflow: auto;
+    }
+
+    .menu-list {
+        grid-area: menu;
+        overflow: auto;
+        background-color: $grey-2;
+        background-color: var(--si-background-color);
+    }
+    // Match the parent's border-radius
+    // &:last-child .menu-list {
+    //     border-radius: 0 0 0.25em 0;
+    // }
+
+    .items-list,
+    .menu-list {
+        display: flex;
+        padding: 0.5em 0.25em;
+
+        /* Add a pseudo-margin to the last element in the list to compensate for
+        overflow scroll ignoring the margin-right of the last element, as per
+        https://stackoverflow.com/a/38997047/4485551.
+        Also, ensure the list doesn't shrink in height when it's empty;
+        */
+        &::after {
+            flex: 0 0 0.25em;
+            color: transparent;
+            overflow: hidden;
+            padding: 0.2em 0;
+            content: '.';
+        }
+    }
+
+    .delete-dropzone {
+        grid-area: button;
+        background-color: $red-6;
+        color: $red-1;
+        padding: 0 0.5em;
+    }
+
+    .add-button {
+        grid-area: button;
+        border: none;
+        background: none;
+        font-size: 1em;
+        color: $grey-9;
+        color: var(--si-button-color);
+        padding: 0 0.5em;
+
+        &:focus {
+            outline: 2px dashed $grey-6;
+            outline-color: var(--si-focus-outline-color);
+            z-index: 2;
+        }
+        &:hover {
+            background-color: $grey-2;
+            background-color: var(--si-background-color);
+        }
+
+        &.open {
+            background-color: $grey-2;
+            background-color: var(--si-background-color);
+        }
+    }
+
+    .delete-dropzone,
+    .add-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        svg {
+            height: 1.5em;
+            width: auto;
+        }
+    }
+}
+
+.item {
+    color: $yellow-9;
+    color: var(--si-text-color);
+    background-color: $grey-4;
+    background-color: var(--si-option-background-color);
+
+    box-shadow: 1px 1px 2px rgba($grey-9, 0.4);
+
+    // Outline glow
+    position: relative;
+    &::after {
+        content: '';
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        border: solid rgba(white, 0.4);
+        border-width: 0 1px 1px 0;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    margin: 0 0.25em;
+    white-space: nowrap;
+    border-radius: 0.15em;
+
+    display: flex;
+
+    &.is-dragging {
+        transition: box-shadow 0.15s ease-in-out;
+        box-shadow: 2px 5px 8px -1px rgba($grey-9, 0.4);
+    }
+
+    &.over-delete-dropzone {
+        opacity: 0.75;
+    }
+
+    &:focus.is-dragging {
+        outline: none;
+    }
+
+    .drag-handle {
+        padding: 0.2em 0.4em;
+        user-select: none;
+
+        &:focus {
+            outline: 2px dashed $grey-6;
+            outline-color: var(--si-focus-outline-color);
+            z-index: 2;
+        }
+    }
+}

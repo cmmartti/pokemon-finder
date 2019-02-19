@@ -1,0 +1,134 @@
+@import 'shared';
+
+.picker {
+    display: inline-block;
+    position: relative;
+}
+
+.text-input {
+    background-color: $grey-3;
+    border-radius: 0.15em;
+    border: none;
+    font-size: 1em;
+    font-family: inherit;
+    padding: 0.2em 0.3em;
+    min-width: 1.75em;
+    max-width: 30em;
+    color: inherit;
+    font-family: inherit;
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    display: inline-block;
+    line-height: 1.15;
+
+    position: relative;
+    z-index: 3;
+
+    &:hover {
+        background-color: $grey-4;
+    }
+    &:focus {
+        background: white;
+        outline: 2px solid $grey-6;
+        outline-offset: 0;
+        outline: none;
+        // border-radius: 0;
+        box-shadow: inset 2px 2px 4px rgba($grey-9, 0.4);
+    }
+    &::-ms-clear {
+        display: none;
+    }
+    &::selection {
+        background-color: rgba($purple-6, 0.5);
+        // color: white;
+    }
+    &::placeholder {
+        font-style: italic;
+    }
+}
+
+.popup {
+    position: absolute;
+    top: calc(100% + 0.25em);
+    z-index: 10;
+    // border-radius: 0.25em;
+    overflow: hidden;
+    box-shadow: 2px 2px 4px rgba($grey-9, 0.4);
+    line-height: 1.15;
+}
+
+.options-list {
+    width: max-content;
+    min-width: 8em;
+    overflow: auto;
+    max-height: 22em;
+    // scrollbar-width: thin;
+
+    @media (max-height: 40em) {
+        max-height: 14em;
+    }
+    @media (max-height: 25em) {
+        max-height: 9.25em;
+    }
+}
+
+.option {
+    flex: 0 0;
+    padding: 0.25em 0.35em;
+    user-select: none;
+    min-height: calc(1em + (0.25em * 2));
+
+    display: flex;
+    align-items: center;
+    > * {
+        flex: 1 0;
+    }
+    .icon {
+        flex: 0 0 auto;
+        height: 1em;
+        width: auto;
+        margin: 0 0.15em 0 0.75em;
+    }
+
+    background-color: white;
+    &.focused {
+        background-color: $grey-4;
+    }
+    &[aria-selected='true'],
+    &.selected {
+        background-color: $purple-3;
+    }
+    &[aria-selected='true'].focused,
+    &.selected.focused {
+        background-color: $purple-4;
+    }
+
+    .option-description {
+        font-size: 0.8em;
+        color: $grey-7;
+        // line-height: 1;
+        margin: 0.15em 0 0 0;
+        max-width: 22em;
+    }
+}
+
+.delete-option {
+    color: $red-7;
+    .icon {
+        margin: 0 0.25em 0 0;
+    }
+    &.focused {
+        background-color: $red-2;
+    }
+}
+
+.visually-hidden {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+}

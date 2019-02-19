@@ -1,0 +1,110 @@
+@import 'shared';
+
+.settings {
+    box-shadow: 1px 2px 6px rgba($grey-9, 0.3);
+    margin: 1.75em auto;
+    border-radius: 0.25em;
+    background-color: white;
+    // width: 30em;
+    max-width: 55em;
+}
+
+.section {
+    .label {
+        background-color: $purple-5;
+        color: white;
+        font-weight: normal;
+        margin: 0;
+        font-size: 1em;
+        user-select: none;
+    }
+    @media (min-width: 40em) {
+        display: flex;
+        align-items: stretch;
+
+        .label {
+            flex: 0;
+            min-width: 4em;
+            padding: 0.7em 0.5em;
+            text-align: right;
+        }
+
+        .content {
+            flex: 1 0;
+            min-width: 0;
+        }
+
+        & + & {
+            border-top: 1px solid $purple-5;
+        }
+
+        &:first-child .label {
+            border-radius: 0.25em 0 0 0;
+        }
+
+        &:last-child .label {
+            border-radius: 0 0 0 0.25em;
+        }
+    }
+
+    @media (max-width: 40em) {
+        display: block;
+        border: none;
+
+        .label {
+            text-align: left;
+            padding: 0.25em 0.4em;
+            border-radius: 0;
+        }
+        &:first-child .label {
+            border-radius: 0.25em 0.25em 0 0;
+        }
+    }
+}
+
+.sort-button {
+    border: none;
+    border-radius: 0 0.15em 0.15em 0;
+    color: inherit;
+    background-color: $yellow-4;
+    padding: 0 0.25em;
+    display: flex;
+    align-items: center;
+    svg {
+        height: 1em;
+        width: 1em;
+    }
+
+    &:focus {
+        outline: 2px dashed $yellow-6;
+    }
+    &:not(:disabled) {
+        &:hover {
+            background-color: $yellow-5;
+        }
+        &:active {
+            background-color: $yellow-5;
+            svg {
+                transform: scale(0.92);
+            }
+        }
+    }
+    &:disabled {
+        color: $yellow-6;
+    }
+}
+
+.sort-theme {
+    --si-text-color: #{$yellow-9};
+    --si-button-color: #{$yellow-5};
+    --si-background-color: #{$yellow-1};
+    --si-focus-outline-color: #{$yellow-6};
+    --si-option-background-color: #{$yellow-3};
+}
+.field-theme {
+    --si-text-color: #{$green-9};
+    --si-button-color: #{$green-5};
+    --si-background-color: #{$green-1};
+    --si-focus-outline-color: #{$green-6};
+    --si-option-background-color: #{$green-3};
+}

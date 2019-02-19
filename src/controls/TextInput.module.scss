@@ -1,0 +1,88 @@
+@import 'shared';
+
+.text-input {
+    display: inline-block;
+    position: relative;
+    line-height: 1.15;
+}
+
+.input {
+    border: 2px solid $grey-3;
+    background-color: $grey-1;
+    border-radius: 0.15em;
+    font-size: 1em;
+    font-family: inherit;
+    padding: 0.15em 0.3em;
+    min-width: 1.75em;
+    max-width: 30em;
+    color: inherit;
+    font-family: inherit;
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    display: inline-block;
+    position: relative;
+    z-index: 3;
+
+    &:hover {
+        border-color: $grey-4;
+    }
+    &:focus {
+        background: white;
+        border-color: $purple-5;
+        outline: none;
+    }
+    &::-ms-clear {
+        display: none;
+    }
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 0.25em);
+    z-index: 10;
+    border-radius: 0.25em;
+    box-shadow: 2px 2px 4px rgba($grey-9, 0.4);
+    line-height: 1.15;
+
+    width: max-content;
+    min-width: 8em;
+    overflow: auto;
+    max-height: 22em;
+    // scrollbar-width: thin;
+
+    @media (max-height: 40em) {
+        max-height: 14em;
+    }
+    @media (max-height: 25em) {
+        max-height: 9.25em;
+    }
+}
+
+.option {
+    flex: 0 0;
+    padding: 0.25em 0.35em;
+    user-select: none;
+    min-height: calc(1em + (0.25em * 2));
+
+    display: flex;
+    align-items: center;
+    > * {
+        flex: 1 0;
+    }
+    .icon {
+        flex: 0 0 auto;
+        height: 1em;
+        width: auto;
+        margin: 0 0.15em 0 0.75em;
+    }
+
+    background-color: white;
+    &--is-focused {
+        background-color: $grey-4;
+    }
+}
