@@ -51,7 +51,56 @@ function DefaultMenuItem({innerRef, innerProps, id, checked, label, className = 
     );
 }
 
-function Menu({
+type ContainerProps = {
+    innerRef: any;
+    innerProps: any;
+    children: any;
+    className?: string;
+};
+type ButtonProps = {
+    innerRef: any;
+    innerProps: any;
+    className: string;
+    label: string;
+    menuIsOpen: boolean;
+};
+type ListProps = {
+    innerProps: any;
+    children: any;
+    className: string;
+};
+type MenuItemProps = {
+    innerRef: any;
+    innerProps: any;
+    checked: boolean;
+    className: string;
+    id: string;
+    label: string;
+};
+
+type Props = {
+    label: any;
+    items: Item[];
+    Container?: (props: ContainerProps) => any;
+    Button?: (props: ButtonProps) => any;
+    List?: (props: ListProps) => any;
+    MenuItem?: (props: MenuItemProps) => any;
+    className?: string;
+    classNames?: {
+        button?: string;
+        list?: string;
+        menuItem?: string;
+    };
+};
+
+type Item = {
+    id: string;
+    label: string;
+    onSelect(isChecked: boolean): any;
+    checked: boolean;
+};
+
+export default function Menu({
     label = '',
     items = [],
     Container = DefaultContainer,
@@ -60,13 +109,13 @@ function Menu({
     MenuItem = DefaultMenuItem,
     className = '',
     classNames = {},
-}) {
+}: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [withKeyboard, setWithKeyboard] = useState(false);
 
-    const menuRef = useRef(null);
-    const menuButtonRef = useRef(null);
-    const itemRefs = useRef([]);
+    const menuRef = useRef<HTMLElement | null>(null);
+    const menuButtonRef = useRef<HTMLElement | null>(null);
+    const itemRefs = useRef([] as HTMLElement[]);
 
     useOnClickOutside(menuRef, () => {
         setIsOpen(false);
@@ -109,7 +158,7 @@ function Menu({
                         break;
                     case 'Escape':
                         event.preventDefault();
-                        menuButtonRef.current.focus();
+                        if (menuButtonRef.current) menuButtonRef.current.focus();
                         setIsOpen(false);
                         break;
                     case 'Tab':
@@ -147,14 +196,15 @@ function Menu({
                     'aria-haspopup': true,
                     'aria-expanded': isOpen,
                 }}
-                className={classNames.button}
+                className={classNames.button || ''}
             />
 
             {isOpen && (
-                <List innerProps={{role: 'menu'}} className={classNames.list}>
+                <List innerProps={{role: 'menu'}} className={classNames.list || ''}>
                     {items.map(({id, label, checked, onSelect}, i) => (
                         <MenuItem
                             key={id}
+                            id={id}
                             label={label}
                             checked={checked}
                             innerRef={element => (itemRefs.current[i] = element)}
@@ -170,7 +220,7 @@ function Menu({
                                 onMouseEnter: event => event.target.focus(),
                                 onMouseLeave: event => event.target.blur(),
                             }}
-                            className={classNames.menuItem}
+                            className={classNames.menuItem || ''}
                         />
                     ))}
                 </List>
@@ -178,21 +228,3 @@ function Menu({
         </Container>
     );
 }
-
-Menu.propTypes = {
-    label: PropTypes.any,
-    items: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-            label: PropTypes.string,
-            onSelect: PropTypes.func,
-            checked: PropTypes.bool,
-        })
-    ),
-    Container: PropTypes.func,
-    Button: PropTypes.func,
-    List: PropTypes.func,
-    MenuItem: PropTypes.func,
-};
-
-export default Menu;

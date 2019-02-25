@@ -3,20 +3,18 @@ import React, {useLayoutEffect, useRef} from 'react';
 function VariableWidthInput({
     forwardedRef,
     sizerClassName = '',
-    copyStyle = {},
+    sizerStyle = {},
     ...props
 }) {
-    const inputRef = useRef(null);
-    const sizerRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const sizerRef = useRef<HTMLElement | null>(null);
 
     // Imperatively resize the input element when the 'value' or 'placeholder'
     // props change, using the hidden span as a measuring stick.
     useLayoutEffect(() => {
-        let width = sizerRef.current.offsetWidth;
-        // if (props.type === 'number') {
-        //     width += 20;
-        // }
-        inputRef.current.style.width = width + 1 + 'px';
+        if (inputRef.current && sizerRef.current) {
+            inputRef.current.style.width = sizerRef.current.offsetWidth + 1 + 'px';
+        }
     }, [props.value, props.placeholder]);
 
     function manageRef(element) {
@@ -37,7 +35,7 @@ function VariableWidthInput({
             <span
                 className={sizerClassName}
                 style={{
-                    ...copyStyle,
+                    ...sizerStyle,
                     display: 'block',
                     position: 'absolute',
                     left: '-9999px',
@@ -52,6 +50,11 @@ function VariableWidthInput({
     );
 }
 
-export default React.forwardRef((props, ref) => (
+type Props = React.HTMLProps<HTMLInputElement> & {
+    sizerClassName?: string;
+    sizerStyle?: {};
+};
+
+export default React.forwardRef<HTMLElement, Props>((props, ref) => (
     <VariableWidthInput {...props} forwardedRef={ref} />
 ));

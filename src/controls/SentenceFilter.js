@@ -48,39 +48,29 @@ function MenuButton({innerRef, innerProps, menuIsOpen}) {
  *
  **************************************************************************************/
 
-function SentenceFilter({parameters, children, common = {}, setActive}) {
+export default function SentenceFilter({parameters, children, setActive}) {
     const partRefs = useRef({});
 
     const sentenceParts = [];
     const menuParameters = [];
 
     React.Children.forEach(children, part => {
-        const {id, text, Input, main, fixed} = part.props;
+        const {id, text, render, main, fixed} = part.props;
 
         if (!id) {
             sentenceParts.push(text);
         } //
         else if (parameters[id].active || fixed) {
-            if (typeof Input === 'function') {
+            if (render) {
                 let ref;
                 if (main) {
                     ref = element => (partRefs.current[id] = element);
                 }
                 sentenceParts.push(
-                    Input({
-                        innerRef: ref,
-                        ...common,
-                        ...parameters[id],
-                    })
+                    <React.Fragment key={`${id}_${render.name}`}>
+                        {render(ref)}
+                    </React.Fragment>
                 );
-                // sentenceParts.push(
-                //     <Input
-                //         innerRef={ref}
-                //         key={`${id}_${Input.name}`}
-                //         {...common}
-                //         {...parameters[id]}
-                //     />
-                // );
             } else {
                 sentenceParts.push(text);
             }
@@ -134,7 +124,6 @@ function SentenceFilter({parameters, children, common = {}, setActive}) {
 SentenceFilter.propTypes = {
     parameters: PropTypes.objectOf(
         PropTypes.shape({
-            id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
             active: PropTypes.bool.isRequired,
         })
@@ -151,14 +140,13 @@ SentenceFilter.propTypes = {
     },
 };
 
-function SentencePart() {}
+export function SentencePart() {
+    return null;
+}
 SentencePart.propTypes = {
-    text: PropTypes.string.isRequired,
-    input: PropTypes.func,
+    text: PropTypes.string,
+    render: PropTypes.func,
     id: PropTypes.string,
     main: PropTypes.bool,
     keepWithNext: PropTypes.bool,
 };
-
-export {SentencePart};
-export default SentenceFilter;

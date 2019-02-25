@@ -24,13 +24,21 @@ function Option({innerProps, isFocused, text, search}) {
     );
 }
 
-function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef}) {
-    const inputRef = useRef(null);
+type Props = {
+    value: string;
+    onChange(newValue: string): any;
+    onSubmit(newValue: string): any;
+    suggestions?: string[];
+    forwardedRef?: any;
+};
+
+function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef}: Props) {
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const containerRef = useRef(null);
     useOnClickOutside(containerRef, close);
 
     const [isOpen, setIsOpen] = useState(false);
-    const [focused, setFocused] = useState(null);
+    const [focused, setFocused] = useState<string | null>(null);
     const [typed, setTyped] = useState(value || '');
     const [inputValue, setInputValue] = useState(typed);
 
@@ -42,11 +50,11 @@ function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef})
 
     useImperativeHandle(forwardedRef, () => ({
         focus: () => {
-            inputRef.current.focus();
+            if (inputRef.current) inputRef.current.focus();
             setIsOpen(true);
         },
         blur: () => {
-            inputRef.current.blur();
+            if (inputRef.current) inputRef.current.blur();
             close();
         },
     }));
@@ -82,8 +90,9 @@ function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef})
     function focusSuggestion(direction = 'first') {
         if (!suggestions.length) return;
 
-        const focusIndex = suggestions.indexOf(focused);
-        var newFocusIndex;
+        let newFocusIndex;
+        let focusIndex = -1;
+        if (focused !== null) focusIndex = suggestions.indexOf(focused!);
 
         if (direction === 'up') {
             if (focusIndex === -1) {
@@ -164,6 +173,6 @@ function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef})
     );
 }
 
-export default React.forwardRef((props, ref) => (
+export default React.forwardRef<HTMLElement, Props>((props, ref) => (
     <TextPicker forwardedRef={ref} {...props} />
 ));

@@ -1,13 +1,21 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, forwardRef} from 'react';
 import Select, {components} from 'react-select';
 
 import styles from './Select.module.scss';
 import VariableWidthInput from '../utils/VariableWidthInput';
 
-export const SingleSelect = React.forwardRef(({value, onChange, options = []}, ref) => {
+type Props = {
+    value: any;
+    onChange: (newValue: any) => any;
+    options: any[];
+};
+
+type Ref = HTMLElement;
+
+function SingleSelectBase({value, onChange, options, forwardedRef}) {
     return (
         <Select
-            ref={ref}
+            ref={forwardedRef}
             value={value}
             options={options}
             onChange={onChange}
@@ -18,7 +26,7 @@ export const SingleSelect = React.forwardRef(({value, onChange, options = []}, r
             backspaceRemovesValue={false}
             getOptionValue={getOptionValue}
             getOptionLabel={getOptionLabel}
-            placeholder="search…"
+            placeholder="select…"
             components={{
                 SelectContainer,
                 IndicatorSeparator: null,
@@ -28,9 +36,9 @@ export const SingleSelect = React.forwardRef(({value, onChange, options = []}, r
             {...styleProps}
         />
     );
-});
+}
 
-export const SearchSelect = React.forwardRef(({value, onChange, options = []}, ref) => {
+function SearchSelectBase({value, onChange, options, forwardedRef}) {
     const [relevantOptions, setRelevantOptions] = useState(options);
 
     function handleInputChange(inputValue, {action}) {
@@ -44,7 +52,7 @@ export const SearchSelect = React.forwardRef(({value, onChange, options = []}, r
 
     return (
         <Select
-            ref={ref}
+            ref={forwardedRef}
             value={value}
             options={relevantOptions}
             onChange={onChange}
@@ -70,9 +78,9 @@ export const SearchSelect = React.forwardRef(({value, onChange, options = []}, r
             {...styleProps}
         />
     );
-});
+}
 
-export const MultiSelect = React.forwardRef(({value, onChange, options = []}, ref) => {
+function MultiSelectBase({value, onChange, options, forwardedRef}) {
     const [relevantOptions, setRelevantOptions] = useState(options);
 
     function handleInputChange(inputValue, {action}) {
@@ -86,7 +94,7 @@ export const MultiSelect = React.forwardRef(({value, onChange, options = []}, re
 
     return (
         <Select
-            ref={ref}
+            ref={forwardedRef}
             value={value}
             options={relevantOptions}
             onChange={onChange}
@@ -113,7 +121,17 @@ export const MultiSelect = React.forwardRef(({value, onChange, options = []}, re
             {...styleProps}
         />
     );
-});
+}
+
+export const SingleSelect = forwardRef<HTMLElement, Props>((props, ref) => (
+    <SingleSelectBase forwardedRef={ref} {...props} />
+));
+export const SearchSelect = forwardRef<HTMLElement, Props>((props, ref) => (
+    <SearchSelectBase forwardedRef={ref} {...props} />
+));
+export const MultiSelect = forwardRef<HTMLElement, Props>((props, ref) => (
+    <MultiSelectBase forwardedRef={ref} {...props} />
+));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Common Props
@@ -127,6 +145,7 @@ const styleProps = {
         selectContainer: () => ({}),
         control: () => ({}),
         valueContainer: () => ({}),
+        placeholder: () => ({}),
         singleValue: () => ({}),
         multiValue: () => ({}),
         multiValueLabel: () => ({}),
@@ -182,7 +201,7 @@ function getOptionLabel(option) {
     return option.label;
 }
 
-function filterOption({label, data}, query) {
+function filterOption({label, value, data}, query) {
     return (
         label.toLowerCase().indexOf(query.toLowerCase()) >= 0 ||
         (data.description &&
@@ -320,7 +339,7 @@ function Input({innerRef, isDisabled, selectProps, onChange, onBlur, ...props}) 
             onChange={handleChange}
             onBlur={handleBlur}
             value={inputValue}
-            placeholder={isMulti && value.length ? '' : placeholder}
+            placeholder={isMulti && value && value.length ? '' : placeholder}
         />
     );
 }

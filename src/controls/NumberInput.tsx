@@ -21,9 +21,17 @@ const Checkmark = () => (
     </svg>
 );
 
+type Props = {
+    value: number;
+    onChange(newValue: number): any;
+    min?: number;
+    max?: number;
+    step?: number;
+};
+
 function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step = 1}) {
-    const inputRef = useRef(null);
-    const timeoutRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const timeoutRef = useRef<any>(null);
     const [isSpinning, setIsSpinning] = useState(false);
     const [spinDirection, setSpinDirection] = useState(null);
     const [inputValue, setInputValue] = useState(value);
@@ -48,11 +56,13 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
     }, [isSpinning]);
 
     function spin(direction) {
-        if (direction === 'up' && parseInt(inputValue, 10) < max) {
-            setInputValue(val => (!val ? step : parseInt(val, 10) + step));
+        if (isNaN(parseInt(inputValue, 10))) {
+            setInputValue(0);
+        } else if (direction === 'up' && parseInt(inputValue, 10) < max) {
+            setInputValue(val => parseInt(val, 10) + step);
         } //
         else if (direction === 'down' && parseInt(inputValue, 10) > min) {
-            setInputValue(val => (!val ? -step : parseInt(val, 10) - step));
+            setInputValue(val => parseInt(val, 10) - step);
         } else {
             cancelSpin();
         }
@@ -93,7 +103,7 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
             forwardedRef.current = element;
         }
     }
-    console.log(inputValue, value);
+
     return (
         <div
             className={classNames({
@@ -107,7 +117,9 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
                 ref={manageRef}
                 value={inputValue}
                 type="number"
-                onChange={event => setInputValue(event.target.value)}
+                onChange={event =>
+                    setInputValue((event.target as HTMLInputElement).value)
+                }
                 onKeyDown={handleKeyDown}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
@@ -119,14 +131,14 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
                 className={styles['spinner']}
                 onMouseDown={event => {
                     event.preventDefault(); // prevent loss of focus
-                    inputRef.current.focus();
+                    if (inputRef.current) inputRef.current.focus();
                 }}
             >
                 <button
                     className={styles['spinner-button']}
                     onMouseDown={onMouseDown('up')}
                     onMouseLeave={() => cancelSpin()}
-                    tabIndex="-1"
+                    tabIndex={-1}
                 >
                     <UpChevron />
                 </button>
@@ -134,7 +146,7 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
                     className={styles['spinner-button']}
                     onMouseDown={onMouseDown('down')}
                     onMouseLeave={() => cancelSpin()}
-                    tabIndex="-1"
+                    tabIndex={-1}
                 >
                     <DownChevron />
                 </button>
@@ -144,7 +156,7 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
                     className={styles['submit-button']}
                     aria-label="Submit"
                     disabled={parseInt(inputValue, 10) === parseInt(value, 10)}
-                    tabIndex="-1"
+                    tabIndex={-1}
                     onClick={() => onChange(inputValue)}
                 >
                     <Checkmark />
@@ -154,6 +166,6 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
     );
 }
 
-export default React.forwardRef((props, ref) => (
+export default React.forwardRef<HTMLElement, Props>((props, ref) => (
     <NumberInput forwardedRef={ref} {...props} />
 ));

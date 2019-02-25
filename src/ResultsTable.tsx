@@ -102,13 +102,13 @@ export const columns = [
         id: 'height',
         header: 'Height',
         accessor: 'height',
-        render: value => <nobr>{value} cm</nobr>,
+        render: value => <>{value}&nbsp;cm</>,
     },
     {
         id: 'weight',
         header: 'Weight',
         accessor: 'weight',
-        render: value => <nobr>{value} kg</nobr>,
+        render: value => <>{value}&nbsp;kg</>,
     },
     {
         id: 'color',
@@ -131,7 +131,7 @@ export const columns = [
                 : pokemon.species.idName,
     },
     {
-        id: 'types',
+        id: 'type',
         header: 'Type',
         accessor: pokemon =>
             pokemon.types
@@ -162,7 +162,7 @@ export const columns = [
             pokemon.species.generation.names.length
                 ? pokemon.species.generation.names[0].text
                 : pokemon.species.generation.idName,
-        render: value => <nobr>{value}</nobr>,
+        // render: value => <nobr>{value}</nobr>,
     },
 ];
 
@@ -238,31 +238,40 @@ const QUERY = gql`
     }
 `;
 
-export default function ResultsTable({language, orderBy, filters, columnOrder}) {
-    const {type, color, shape, generation, species, weight} = filters;
+export default function ResultsTable({state}) {
+    const {
+        type,
+        color,
+        shape,
+        generation,
+        species,
+        weight,
+    } = state.search.current.filterValues;
+
+    const {filter} = state.search.current;
 
     const variables = {
-        lang: language,
-        orderBy: orderBy.map(o => {
-            // return {order: o.direction, field: o.id};
-            return {order: orderBy[0].direction, field: o.id};
+        lang: state.languages,
+        orderBy: state.search.current.sort.map(o => {
+            // return {order: o.reverse ? 'DESC' : 'ASC', id: o.id};
+            return {
+                order: state.search.current.sort[0].reverse ? 'DESC' : 'ASC',
+                field: o.id,
+            };
         }),
         quantity: 1000,
-        type: {[type.method]: type.active ? type.value : null},
-        color: color.active ? color.value : null,
-        shape: shape.active ? shape.value : null,
-        generation: generation.active ? generation.value : null,
-        species: {
-            [species.method]: species.active ? species.value : null,
-            lang: language[0],
-        },
-        weight: {[weight.operator]: weight.active ? weight.value : null},
+        type: filter.type && type !== null ? {[type.match]: type.list} : null,
+        color: filter.color ? color : null,
+        shape: filter.shape ? shape : null,
+        generation: filter.generation ? generation : null,
+        species:
+            filter.species && species !== null
+                ? {[species.match]: species.string, lang: state.languages[0]}
+                : null,
+        weight: filter.weight && weight !== null ? {[weight.match]: weight.number} : null,
     };
 
-    let {data, error} = useQuery(QUERY, {variables});
-    if (error) {
-        throw error;
-    }
+    let {data} = useQuery(QUERY, {variables});
 
     data = data.pokemons.edges.map((edge, index) => ({
         ...edge.node,
@@ -273,7 +282,9 @@ export default function ResultsTable({language, orderBy, filters, columnOrder}) 
         <div className={styles['output']}>
             <Table
                 data={data}
-                columns={columnOrder.map(id => columns.find(col => col.id === id))}
+                columns={state.search.current.fields.map(id =>
+                    columns.find(col => col.id === id)
+                )}
             />
         </div>
     );

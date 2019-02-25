@@ -83,6 +83,15 @@
         background-color: white;
     }
 
+    &__placeholder {
+        color: $grey-6;
+        padding: 0.15em 0 0.15em 0.15em;
+    }
+    &__control:hover &__placeholder,
+    &__control--is-focused &__placeholder {
+        color: $grey-9;
+    }
+
     &__single-value {
         padding: 0.15em 0 0.15em 0.15em;
     }

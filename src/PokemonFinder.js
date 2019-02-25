@@ -19,53 +19,47 @@ function convertValue(options, optionIds) {
 }
 
 function convertSort(sortOptions, sort) {
-    return sort.map(({id, direction}) => {
+    return sort.map(({id, reverse}) => {
         return {
             ...sortOptions.find(option => option.id === id),
-            direction,
+            reverse,
         };
     });
 }
 
-function PokemonFinder({
-    filters,
-    setFilter,
-    setActive,
-    fields,
-    setFields,
-    sort,
-    setSort,
-    languages,
-    setLanguages,
-}) {
+function PokemonFinder({state, dispatch}) {
     function OptionAction({data, isSelected}) {
         return (
             <button
                 className={styles['sort-button']}
                 onClick={() => {
+                    const {sort} = search;
                     const index = sort.findIndex(s => s.id === data.id);
-                    setSort([
-                        ...sort.slice(0, index),
-                        {...data, direction: data.direction === 'ASC' ? 'DESC' : 'ASC'},
-                        ...sort.slice(index + 1, sort.length),
-                    ]);
+                    dispatch({
+                        type: 'set_search_sort',
+                        sort: [
+                            ...sort.slice(0, index),
+                            {...data, reverse: !data.reverse},
+                            ...sort.slice(index + 1, sort.length),
+                        ],
+                    });
                 }}
                 disabled={!isSelected}
                 key={data.id}
                 aria-label={
-                    data.direction === 'ASC'
-                        ? `Switch ${data.Header} sort to descending order`
-                        : `Switch ${data.Header} sort to ascending order`
+                    data.reverse
+                        ? `Switch ${data.Header} sort to ascending order`
+                        : `Switch ${data.Header} sort to descending order`
                 }
-                title={data.direction === 'ASC' ? 'Ascending' : 'Descending'}
+                title={data.reverse ? 'Descending' : 'Ascending'}
             >
-                {data.direction === 'ASC' ? (
+                {data.reverse ? (
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M7 10v8h6v-8h5l-8-8-8 8h5z" />
+                        <path d="M7 10V2h6v8h5l-8 8-8-8h5z" />
                     </svg>
                 ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M7 10V2h6v8h5l-8 8-8-8h5z" />
+                        <path d="M7 10v8h6v-8h5l-8-8-8 8h5z" />
                     </svg>
                 )}
             </button>
@@ -73,28 +67,25 @@ function PokemonFinder({
     }
 
     const sortOptions = [
-        {id: 'order', header: 'Order', direction: 'ASC'},
-        {id: 'height', header: 'Height', direction: 'ASC'},
-        {id: 'isDefault', header: 'Is Default', direction: 'ASC'},
-        {id: 'weight', header: 'Weight', direction: 'ASC'},
+        {id: 'order', header: 'Order', reverse: false},
+        {id: 'height', header: 'Height', reverse: false},
+        {id: 'isDefault', header: 'Is Default', reverse: false},
+        {id: 'weight', header: 'Weight', reverse: false},
     ];
+
+    const search = state.search.pending || state.search.current;
 
     return (
         <div>
             <div className={styles['settings']}>
                 <ViewSettingsSection label="Filter">
-                    <Filter
-                        filters={filters}
-                        languages={languages}
-                        update={setFilter}
-                        setActive={setActive}
-                    />
+                    <Filter state={state} dispatch={dispatch} />
                 </ViewSettingsSection>
                 <ViewSettingsSection label="Sort*">
                     <SortableInput
                         options={sortOptions}
-                        value={convertSort(sortOptions, sort)}
-                        onChange={setSort}
+                        value={convertSort(sortOptions, search.sort)}
+                        onChange={sort => dispatch({type: 'set_search_sort', sort})}
                         OptionAction={OptionAction}
                         themeClassName={styles['sort-theme']}
                     />
@@ -102,24 +93,36 @@ function PokemonFinder({
                 <ViewSettingsSection label="Fields">
                     <SortableInput
                         options={columns}
-                        value={convertValue(columns, fields)}
-                        onChange={setFields}
+                        value={convertValue(columns, search.fields)}
+                        onChange={fields =>
+                            dispatch({
+                                type: 'set_search_fields',
+                                fields: fields.map(field => field.id),
+                            })
+                        }
                         themeClassName={styles['field-theme']}
                     />
                 </ViewSettingsSection>
             </div>
-            {/* <p>
-                * Note: Due to API limitations, all sort directions (ascending/descending)
-                except the first are ignored. This may change in the future.
-            </p> */}
+            <label>
+                <input
+                    type="checkbox"
+                    checked={state.autoSubmit}
+                    onChange={e =>
+                        dispatch({type: 'set_auto_submit', value: e.target.checked})
+                    }
+                />{' '}
+                Auto-submit
+            </label>
+            <button
+                onClick={() => dispatch({type: 'submit_pending'})}
+                disabled={!state.search.pending}
+            >
+                Submit
+            </button>
 
             <React.Suspense fallback={<p>Loading results...</p>}>
-                <ResultsTable
-                    language={languages}
-                    orderBy={sort}
-                    filters={filters}
-                    columnOrder={fields}
-                />
+                <ResultsTable state={state} />
             </React.Suspense>
         </div>
     );
