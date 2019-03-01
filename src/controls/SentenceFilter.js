@@ -51,6 +51,15 @@ function MenuButton({innerRef, innerProps, menuIsOpen}) {
 export default function SentenceFilter({parameters, children, setActive}) {
     const partRefs = useRef({});
 
+    // Try to focus the parameter's main sentence part after it is activated
+    const [newParameter, setNewParameter] = useState(null);
+    useEffect(() => {
+        const element = partRefs.current[newParameter];
+        if (element && typeof element.focus === 'function') {
+            element.focus();
+        }
+    }, [newParameter]);
+
     const sentenceParts = [];
     const menuParameters = [];
 
@@ -84,15 +93,6 @@ export default function SentenceFilter({parameters, children, setActive}) {
     menuParameters.sort((a, b) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
     );
-
-    // Try to focus the parameter's main sentence part after it is activated
-    const [newParameter, setNewParameter] = useState(null);
-    useEffect(() => {
-        const element = partRefs.current[newParameter];
-        if (element && typeof element.focus === 'function') {
-            element.focus();
-        }
-    }, [newParameter]);
 
     return (
         <div className={styles['parameter-list']}>
@@ -140,9 +140,7 @@ SentenceFilter.propTypes = {
     },
 };
 
-export function SentencePart() {
-    return null;
-}
+export const SentencePart = () => null;
 SentencePart.propTypes = {
     text: PropTypes.string,
     render: PropTypes.func,

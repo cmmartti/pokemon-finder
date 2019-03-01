@@ -54,8 +54,8 @@ export default function SortableInput({
     options,
     value,
     onChange,
-    OptionAction,
-    themeClassName,
+    OptionAction = null,
+    themeClassName = '',
 }) {
     const [deleteMode, setDeleteMode] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);

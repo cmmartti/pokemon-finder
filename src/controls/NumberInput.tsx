@@ -1,7 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import classNames from 'classnames';
 
-import VariableWidthInput from '../utils/VariableWidthInput';
+import VariableWidthInput from './VariableWidthInput';
 import useInterval from '../utils/useInterval';
 import styles from './NumberInput.module.scss';
 
@@ -22,7 +22,7 @@ const Checkmark = () => (
 );
 
 type Props = {
-    value: number;
+    value: number | null;
     onChange(newValue: number): any;
     min?: number;
     max?: number;
@@ -115,7 +115,7 @@ function NumberInput({forwardedRef, value, onChange, min = 0, max = 10000, step 
                 className={styles['input']}
                 sizerClassName={styles['input']}
                 ref={manageRef}
-                value={inputValue}
+                value={inputValue === null ? '' : inputValue}
                 type="number"
                 onChange={event =>
                     setInputValue((event.target as HTMLInputElement).value)

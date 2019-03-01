@@ -3,10 +3,18 @@ import {useQuery} from 'react-apollo-hooks';
 import gql from 'graphql-tag';
 
 import {SingleSelect, SearchSelect, MultiSelect} from './controls/Select';
-import TextPicker from './controls/TextPicker';
+import TextInput from './controls/TextInput';
 import NumberInput from './controls/NumberInput';
 import SentenceFilter, {SentencePart as Part} from './controls/SentenceFilter';
-import {NumberMatchValue, StringMatchValue, ListMatchValue} from './State';
+import {StateProps} from './state/StateManager';
+import {
+    createString,
+    createNumber,
+    createArray,
+    createStringMatch,
+    createNumberMatch,
+    createArrayMatch,
+} from './state/types';
 
 const QUERY = gql`
     query($lang: [String]) {
@@ -53,16 +61,16 @@ const QUERY = gql`
     }
 `;
 
-export default function Filter({state, dispatch}) {
+export default function Filter({state, dispatch}: StateProps) {
     const {data} = useQuery(QUERY, {variables: {lang: state.languages}});
 
     const search = state.search.pending || state.search.current;
-    const values = search.filterValues;
+    const filter = search.filter;
 
-    function update(id, value) {
+    function update(key, value) {
         dispatch({
-            type: 'set_search_filter_values',
-            filterValues: {...values, [id]: value},
+            type: 'set_search_filter',
+            filter: {...filter, [key]: value},
         });
     }
 
@@ -71,12 +79,13 @@ export default function Filter({state, dispatch}) {
             id: color.idName,
             label: color.names.length ? color.names[0].text : color.idName,
         }));
+        const {active, value} = filter.color;
         return (
             <SearchSelect
-                onChange={val => update('color', val.id)}
+                onChange={val => update('color', createString(active, val.id))}
                 options={options}
                 ref={innerRef}
-                value={options.find(option => option.id === values.color)}
+                value={options.find(option => option.id === value)}
             />
         );
     }
@@ -86,12 +95,13 @@ export default function Filter({state, dispatch}) {
             id: shape.idName,
             label: shape.names.length ? shape.names[0].text : shape.idName,
         }));
+        const {active, value} = filter.shape;
         return (
             <SearchSelect
-                onChange={val => update('shape', val.id)}
+                onChange={val => update('shape', createString(active, val.id))}
                 options={options}
                 ref={innerRef}
-                value={options.find(option => option.id === values.shape)}
+                value={options.find(option => option.id === value)}
             />
         );
     }
@@ -102,14 +112,15 @@ export default function Filter({state, dispatch}) {
             {id: 'some', label: 'one of'},
             {id: 'eq', label: 'exactly'},
         ];
+        const {active, value} = filter.type;
         return (
             <SingleSelect
                 onChange={val =>
-                    update('type', new ListMatchValue(values.type.list, val.id))
+                    update('type', createArrayMatch(active, value.array, val.id))
                 }
                 options={options}
                 ref={innerRef}
-                value={options.find(option => option.id === values.type.match)}
+                value={options.find(option => option.id === value.match)}
             />
         );
     }
@@ -119,6 +130,7 @@ export default function Filter({state, dispatch}) {
             id: node.idName,
             label: node.names.length ? node.names[0].text : node.idName,
         }));
+        const {active, value} = filter.type;
         return (
             <MultiSelect
                 ref={innerRef}
@@ -126,13 +138,14 @@ export default function Filter({state, dispatch}) {
                 onChange={newValues =>
                     update(
                         'type',
-                        new ListMatchValue(
+                        createArrayMatch(
+                            active,
                             newValues ? newValues.map(val => val.id) : [],
-                            values.type.match
+                            value.match
                         )
                     )
                 }
-                value={values.type.list.map(id => options.find(opt => opt.id === id))}
+                value={value.array.map(id => options.find(opt => opt.id === id))}
             />
         );
     }
@@ -149,12 +162,13 @@ export default function Filter({state, dispatch}) {
                 )
                 .join(', '),
         }));
+        const {active, value} = filter.generation;
         return (
             <SearchSelect
-                onChange={newValue => update('generation', newValue.id)}
+                onChange={val => update('generation', createString(active, val.id))}
                 options={options}
                 ref={innerRef}
-                value={options.find(option => option.id === values.generation)}
+                value={options.find(option => option.id === value)}
             />
         );
     }
@@ -165,29 +179,28 @@ export default function Filter({state, dispatch}) {
             {id: 'eq', label: 'equal to'},
             {id: 'gt', label: 'greater than'},
         ];
+        const {active, value} = filter.weight;
         return (
             <SingleSelect
-                onChange={newValue =>
-                    update(
-                        'weight',
-                        new NumberMatchValue(values.weight.number, newValue.id)
-                    )
+                onChange={val =>
+                    update('weight', createNumberMatch(active, value.number, val.id))
                 }
                 options={options}
                 ref={innerRef}
-                value={options.find(option => option.id === values.weight.match)}
+                value={options.find(option => option.id === value.match)}
             />
         );
     }
 
     function weightInput(innerRef) {
+        const {active, value} = filter.weight;
         return (
             <NumberInput
-                value={values.weight.number}
                 ref={innerRef}
-                onChange={newValue =>
-                    update('weight', new NumberMatchValue(newValue, values.weight.match))
+                onChange={val =>
+                    update('weight', createNumberMatch(active, val, value.match))
                 }
+                value={value.number}
             />
         );
     }
@@ -198,23 +211,22 @@ export default function Filter({state, dispatch}) {
             {id: 'sw', label: 'start with'},
             {id: 'eq', label: 'exactly match'},
         ];
+        const {active, value} = filter.species;
         return (
             <SingleSelect
-                onChange={newValue =>
-                    update(
-                        'species',
-                        new StringMatchValue(values.species.string, newValue.id)
-                    )
+                onChange={val =>
+                    update('species', createStringMatch(active, value.string, val.id))
                 }
                 options={options}
                 ref={innerRef}
-                value={options.find(option => option.id === values.species.match)}
+                value={options.find(option => option.id === value.match)}
             />
         );
     }
 
-    function speciesTextSelect(innerRef) {
-        const [typed, setTyped] = useState(values.species.string);
+    function SpeciesTextSelect({innerRef}) {
+        const {active, value} = filter.species;
+        const [typed, setTyped] = useState(value.string);
 
         const query = gql`
             query($lang: [String], $textFilter: TextFilter!) {
@@ -231,10 +243,7 @@ export default function Filter({state, dispatch}) {
         `;
         const {data} = useQuery(query, {
             variables: {
-                textFilter: {
-                    [values.species.match]: typed,
-                    lang: state.languages[0],
-                },
+                textFilter: {[value.match]: typed, lang: state.languages[0]},
                 lang: state.languages,
             },
             suspend: false,
@@ -247,36 +256,33 @@ export default function Filter({state, dispatch}) {
             );
         }
         return (
-            <TextPicker
+            <TextInput
                 ref={innerRef}
-                onSubmit={newValue =>
-                    update(
-                        'species',
-                        new StringMatchValue(newValue, values.species.match)
-                    )
+                onSubmit={val =>
+                    update('species', createStringMatch(active, val, value.match))
                 }
                 onChange={setTyped}
                 suggestions={suggestions}
-                value={values.species.string}
+                value={value.string || ''}
             />
         );
     }
 
     return (
         <SentenceFilter
-            setActive={(id, active) =>
+            setActive={(key, active) =>
                 dispatch({
                     type: 'set_search_filter',
-                    filter: {...search.filter, [id]: active},
+                    filter: {...filter, [key]: {...filter[key], active}},
                 })
             }
             parameters={{
-                color: {name: 'Colour', active: search.filter.color},
-                generation: {name: 'Generation', active: search.filter.generation},
-                shape: {name: 'Shape', active: search.filter.shape},
-                species: {name: 'Species Name', active: search.filter.species},
-                type: {name: 'Type', active: search.filter.type},
-                weight: {name: 'Weight', active: search.filter.weight},
+                color: {name: 'Colour', active: filter.color.active},
+                generation: {name: 'Generation', active: filter.generation.active},
+                shape: {name: 'Shape', active: filter.shape.active},
+                species: {name: 'Species Name', active: filter.species.active},
+                type: {name: 'Type', active: filter.type.active},
+                weight: {name: 'Weight', active: filter.weight.active},
             }}
         >
             <Part text="All " />
@@ -299,7 +305,11 @@ export default function Filter({state, dispatch}) {
             <Part text=" whose species names " id="species" />
             <Part render={speciesWhichSelect} id="species" />
             <Part text={' '} id="species" />
-            <Part render={speciesTextSelect} id="species" main />
+            <Part
+                render={innerRef => <SpeciesTextSelect innerRef={innerRef} />}
+                id="species"
+                main
+            />
             <Part text="." />
         </SentenceFilter>
     );

@@ -8,18 +8,17 @@ import 'sanitize.css';
 import 'focus-visible/dist/focus-visible.min.js';
 
 import GlobalErrorBoundary from './GlobalErrorBoundary';
-import StateManager from './State';
+import StateManager from './state/StateManager';
 import PokemonFinder from './PokemonFinder';
 import './index.scss';
 
-const client = new ApolloClient({
-    uri: 'http://localhost:8000/graphql',
-    // uri: 'http://192.168.2.76:801/graphql',
-});
+const uri = 'http://localhost:8000/graphql';
+// const uri = 'http://192.168.2.76:801/graphql';
+const client = new ApolloClient({uri});
 
 const history = createHistory();
 
-function App() {
+function Application() {
     return (
         <GlobalErrorBoundary>
             <ApolloProvider client={client}>
@@ -46,4 +45,4 @@ function App() {
     );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<Application />, document.getElementById('root'));

@@ -2,7 +2,7 @@ import React, {useState, useEffect, forwardRef} from 'react';
 import Select, {components} from 'react-select';
 
 import styles from './Select.module.scss';
-import VariableWidthInput from '../utils/VariableWidthInput';
+import VariableWidthInput from './VariableWidthInput';
 
 type Props = {
     value: any;

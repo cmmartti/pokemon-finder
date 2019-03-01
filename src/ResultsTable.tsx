@@ -239,16 +239,7 @@ const QUERY = gql`
 `;
 
 export default function ResultsTable({state}) {
-    const {
-        type,
-        color,
-        shape,
-        generation,
-        species,
-        weight,
-    } = state.search.current.filterValues;
-
-    const {filter} = state.search.current;
+    const {type, color, shape, generation, species, weight} = state.search.current.filter;
 
     const variables = {
         lang: state.languages,
@@ -260,15 +251,21 @@ export default function ResultsTable({state}) {
             };
         }),
         quantity: 1000,
-        type: filter.type && type !== null ? {[type.match]: type.list} : null,
-        color: filter.color ? color : null,
-        shape: filter.shape ? shape : null,
-        generation: filter.generation ? generation : null,
-        species:
-            filter.species && species !== null
-                ? {[species.match]: species.string, lang: state.languages[0]}
+        type:
+            type.active && type.value !== null
+                ? {[type.value.match]: type.value.array}
                 : null,
-        weight: filter.weight && weight !== null ? {[weight.match]: weight.number} : null,
+        color: color.active ? color.value : null,
+        shape: shape.active ? shape.value : null,
+        generation: generation.active ? generation.value : null,
+        species:
+            species.active && species.value !== null
+                ? {[species.value.match]: species.value.string, lang: state.languages[0]}
+                : null,
+        weight:
+            weight.active && weight.value !== null
+                ? {[weight.value.match]: weight.value.number}
+                : null,
     };
 
     let {data} = useQuery(QUERY, {variables});

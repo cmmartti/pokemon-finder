@@ -4,6 +4,7 @@ import Filter from './Filter';
 import SortableInput from './controls/SortableInput';
 import ResultsTable, {columns} from './ResultsTable';
 import styles from './PokemonFinder.module.scss';
+import {StateProps} from './state/StateManager';
 
 function ViewSettingsSection({label, children}) {
     return (
@@ -27,7 +28,7 @@ function convertSort(sortOptions, sort) {
     });
 }
 
-function PokemonFinder({state, dispatch}) {
+function PokemonFinder({state, dispatch}: StateProps) {
     function OptionAction({data, isSelected}) {
         return (
             <button

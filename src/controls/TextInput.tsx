@@ -2,7 +2,7 @@ import React, {useState, useRef, useImperativeHandle} from 'react';
 import classNames from 'classnames';
 
 import useOnClickOutside from '../utils/useOnClickOutside';
-import VariableWidthInput from '../utils/VariableWidthInput';
+import VariableWidthInput from './VariableWidthInput';
 import styles from './TextInput.module.scss';
 
 function Option({innerProps, isFocused, text, search}) {
@@ -32,7 +32,7 @@ type Props = {
     forwardedRef?: any;
 };
 
-function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef}: Props) {
+function TextInput({value, onChange, onSubmit, suggestions = [], forwardedRef}: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const containerRef = useRef(null);
     useOnClickOutside(containerRef, close);
@@ -174,5 +174,5 @@ function TextPicker({value, onChange, onSubmit, suggestions = [], forwardedRef}:
 }
 
 export default React.forwardRef<HTMLElement, Props>((props, ref) => (
-    <TextPicker forwardedRef={ref} {...props} />
+    <TextInput forwardedRef={ref} {...props} />
 ));
