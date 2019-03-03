@@ -1,18 +1,16 @@
 import {useReducer, useEffect} from 'react';
 import {History} from 'history';
-import {stringify, parse} from 'query-string';
+import {stringify, parse as parseQuery} from 'query-string';
 
 import reducer, {Action} from './reducer';
 import {
     State,
     createString,
-    createNumber,
-    createArray,
     createStringMatch,
     createNumberMatch,
     createArrayMatch,
 } from './types';
-import {flattenState, unflattenState} from './serialize';
+import {flattenState, unflattenState, decodeArray} from './serialize';
 
 const defaultSearch = {
     fields: ['veekun', 'species', 'image-fd', 'type', 'generation'],
@@ -42,41 +40,31 @@ type Props = {
 };
 
 export default function StateManager({children, history}: Props) {
-    function lazyInit() {
-        const initialState = loadState(defaultState);
-        return unflattenState(initialState, parse(history.location.search));
-    }
-    const [state, dispatch] = useReducer(reducer, undefined, lazyInit);
-
     function saveState(state: State): void {
         history.push(history.location.pathname + '?' + stringify(flattenState(state)));
         try {
             localStorage.setItem('state', JSON.stringify(state));
-        } catch {} // ignore write errors
+        } catch {
+            // ignore write errors
+        }
     }
-    function loadState(template: State): State {
+    function loadState(): State | null {
         try {
             const stateJSON = localStorage.getItem('state');
-            if (stateJSON !== null) {
-                return JSON.parse(stateJSON);
-            }
-            return template;
+            if (stateJSON === null) return null;
+            return JSON.parse(stateJSON);
         } catch {
-            return template;
+            return null;
         }
     }
+    function lazyInit() {
+        const initialState = loadState() || defaultState;
+        return unflattenState(initialState, parseQuery(history.location.search));
+    }
 
-    useEffect(() => {
-        function handleStorageChange(event) {
-            dispatch({type: 'set_auto_submit', value: loadState(state).autoSubmit});
-        }
-        window.addEventListener('storage', handleStorageChange);
-        return function cleanUp() {
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    });
-
+    const [state, dispatch] = useReducer(reducer, undefined, lazyInit);
     saveState(state);
+
     return children(state as State, function(action: Action) {
         dispatch(action);
         saveState(state);

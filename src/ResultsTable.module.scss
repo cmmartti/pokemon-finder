@@ -3,11 +3,13 @@
 .output {
     overflow: auto;
     padding-bottom: 1em;
+
     table {
         box-shadow: 1px 2px 6px rgba($grey-9, 0.3);
         // filter: drop-shadow(1px 2px 6px rgba($grey-9, 0.3));
         max-width: 75em;
-        // min-width: 45em;
+        // min-width: 55em;
+        width: 100%;
         margin: 0 auto;
         // border-radius: 0.25em;
         border-collapse: separate;

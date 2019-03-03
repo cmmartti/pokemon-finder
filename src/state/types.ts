@@ -7,15 +7,12 @@ export type State = {
         default: Search;
     };
 };
-
 export type Language = string;
-
 export type Search = {
     readonly fields: string[];
     readonly sort: SortField[];
     readonly filter: Filter;
 };
-
 export type Filter = {
     readonly color: StringValue;
     readonly generation: StringValue;
@@ -24,9 +21,27 @@ export type Filter = {
     readonly type: ArrayMatchValue;
     readonly weight: NumberMatchValue;
 };
-
 export type SortField = {id: string; reverse: boolean};
 
+// Value types
+type StringValue = {type: 'string'; value: string | null; active: boolean};
+type NumberValue = {type: 'number'; value: number | null; active: boolean};
+type ArrayValue = {type: 'array'; value: string[]; active: boolean};
+type StringMatchValue = {
+    type: 'StringMatch';
+    value: {string: string | null; match: 'has' | 'sw' | 'eq'};
+    active: boolean;
+};
+type NumberMatchValue = {
+    type: 'NumberMatch';
+    value: {number: number | null; match: 'gt' | 'lt' | 'eq'};
+    active: boolean;
+};
+type ArrayMatchValue = {
+    type: 'ArrayMatch';
+    value: {array: string[]; match: 'all' | 'some' | 'eq'};
+    active: boolean;
+};
 export type Value =
     | StringValue
     | NumberValue
@@ -35,32 +50,22 @@ export type Value =
     | NumberMatchValue
     | ArrayMatchValue;
 
-type StringValue = {type: 'string'; value: string | null; active: boolean};
+// Create value functions
 export function createString(
     active: boolean = false,
     string: string | null = null
 ): StringValue {
     return {type: 'string', value: string, active};
 }
-
-type NumberValue = {type: 'number'; value: number | null; active: boolean};
 export function createNumber(
     active: boolean = false,
     number: number | null = null
 ): NumberValue {
     return {type: 'number', value: number, active};
 }
-
-type ArrayValue = {type: 'array'; value: string[]; active: boolean};
 export function createArray(active: boolean = false, array: string[] = []): ArrayValue {
     return {type: 'array', value: array, active};
 }
-
-type StringMatchValue = {
-    type: 'StringMatch';
-    value: {string: string | null; match: 'has' | 'sw' | 'eq'};
-    active: boolean;
-};
 export function createStringMatch(
     active: boolean = false,
     string: string | null = null,
@@ -68,12 +73,6 @@ export function createStringMatch(
 ): StringMatchValue {
     return {type: 'StringMatch', active, value: {string, match}};
 }
-
-type NumberMatchValue = {
-    type: 'NumberMatch';
-    value: {number: number | null; match: 'gt' | 'lt' | 'eq'};
-    active: boolean;
-};
 export function createNumberMatch(
     active: boolean = false,
     number: number | null = null,
@@ -81,12 +80,6 @@ export function createNumberMatch(
 ): NumberMatchValue {
     return {type: 'NumberMatch', active, value: {number, match}};
 }
-
-type ArrayMatchValue = {
-    type: 'ArrayMatch';
-    value: {array: string[]; match: 'all' | 'some' | 'eq'};
-    active: boolean;
-};
 export function createArrayMatch(
     active: boolean = false,
     array: string[] = [],

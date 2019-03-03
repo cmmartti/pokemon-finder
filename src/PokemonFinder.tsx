@@ -5,6 +5,7 @@ import SortableInput from './controls/SortableInput';
 import ResultsTable, {columns} from './ResultsTable';
 import styles from './PokemonFinder.module.scss';
 import {StateProps} from './state/StateManager';
+import {SortField} from './state/types';
 
 function ViewSettingsSection({label, children}) {
     return (
@@ -16,16 +17,23 @@ function ViewSettingsSection({label, children}) {
 }
 
 function convertValue(options, optionIds) {
-    return optionIds.map(id => options.find(option => option.id === id));
+    const o = [] as string[];
+    for (const id of optionIds) {
+        const option = options.find(option => option.id === id);
+        if (option) o.push(option);
+    }
+    return o;
 }
 
 function convertSort(sortOptions, sort) {
-    return sort.map(({id, reverse}) => {
-        return {
-            ...sortOptions.find(option => option.id === id),
-            reverse,
-        };
-    });
+    const s = [] as SortField[];
+    for (const {id, reverse} of sort) {
+        const sortField = sortOptions.find(option => option.id === id);
+        if (sortField) {
+            s.push({...sortField, reverse});
+        }
+    }
+    return s;
 }
 
 function PokemonFinder({state, dispatch}: StateProps) {

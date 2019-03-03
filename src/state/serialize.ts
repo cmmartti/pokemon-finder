@@ -2,6 +2,7 @@ import {
     State,
     Filter,
     Value,
+    SortField,
     createString,
     createNumber,
     createArray,
@@ -10,7 +11,9 @@ import {
     createArrayMatch,
 } from './types';
 
-export function flattenState(state: State) {
+type Flat = {[index: string]: string | null};
+
+export function flattenState(state: State): Flat {
     const search = state.search.current;
     const flat = {
         sort: encodeSort(search.sort),
@@ -18,39 +21,57 @@ export function flattenState(state: State) {
         lang: encodeArray(state.languages),
     };
 
-    // Only include active, valid filter values
+    // Include only valid, active filter values
     for (const [key, value] of Object.entries(search.filter)) {
-        if (value.active && isValid(value)) {
+        if (isValid(value) && value.active) {
             flat[key] = encode(value);
         }
     }
     return flat;
 }
 
-export function unflattenState(template: State, flat: {[key: string]: string}): State {
+/*
+   Turn a `flat` object of key/string value pairs into a complete State object by
+   comparing them by key with the supplied `mergeWith` State object, filling in any
+   missing filter values from `mergeWith` (but marked inactive). Filter keys in `flat`
+   that don't exist in `mergeWith` will be ignored.
+*/
+export function unflattenState(mergeWith: State, flat: Flat): State {
+    const defaultSearch = mergeWith.search.default;
+
+    const sort = decodeSort(flat.sort);
+    const fields = decodeArray(flat.fields);
     const filter = {};
-    for (const [key, templateValue] of Object.entries(template.search.current.filter)) {
+    let customFilterExists = false;
+    for (const [key, defaultValue] of Object.entries(defaultSearch.filter)) {
+        if (key in flat) {
+            customFilterExists = true;
+        }
         filter[key] =
             key in flat
-                ? decode(templateValue, flat[key], key in flat)
-                : {...templateValue, active: false};
+                ? decode(defaultValue, flat[key], key in flat)
+                : {...defaultValue, active: false};
     }
+    const languages = decodeArray(flat.lang);
 
     return {
-        ...template,
-        languages: decodeArray(flat.lang) || template.languages,
+        ...mergeWith,
+        languages: languages.length ? languages : mergeWith.languages,
         search: {
-            ...template.search,
+            ...mergeWith.search,
             current: {
-                sort: decodeSort(flat.sort) || template.search.current.sort,
-                fields: decodeArray(flat.fields) || template.search.current.fields,
-                filter: filter as Filter,
+                sort: sort.length ? sort : defaultSearch.sort,
+                fields: fields.length ? fields : defaultSearch.fields,
+                filter: customFilterExists ? (filter as Filter) : defaultSearch.filter,
             },
         },
     };
 }
 
-function isValid(v: Value) {
+/*
+   Validate whether the value of a Value matches its type.
+ */
+function isValid(v: Value): boolean {
     switch (v.type) {
         case 'string':
         case 'number':
@@ -156,22 +177,22 @@ export function decode(template: Value, string: string | null, active): Value {
     }
 }
 
-function encodeArray(array) {
+function encodeArray(array: string[]): string {
     if (!array) return '';
     return array.join('_');
 }
 
-function decodeArray(arrayStr) {
+export function decodeArray(arrayStr: string | null): string[] {
     if (!arrayStr) return [];
-    return arrayStr.split('_').map(item => (item === '' ? undefined : item));
+    return arrayStr.split('_').map(item => item);
 }
 
-function encodeSort(sort) {
+function encodeSort(sort: SortField[]): string {
     return encodeArray(sort.map(s => (s.reverse ? `-${s.id}` : s.id)));
 }
 
-function decodeSort(sortString: string) {
-    const sort = decodeArray(sortString) || [];
+function decodeSort(sortString: string | null): SortField[] {
+    const sort = decodeArray(sortString);
     return sort.map(string => {
         if (string[0] === '-') {
             return {id: string.substring(1), reverse: true};
