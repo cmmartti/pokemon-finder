@@ -1,3 +1,8 @@
+import {Action} from './reducer';
+
+export type Dispatch = (action: Action) => void;
+
+// State tree
 export type State = {
     readonly autoSubmit: boolean;
     readonly languages: Language[];
@@ -6,6 +11,9 @@ export type State = {
         pending: Search | null;
         default: Search;
     };
+    readonly refreshCounter: number;
+    readonly isLoading: boolean;
+    readonly printPreview: boolean;
 };
 export type Language = string;
 export type Search = {

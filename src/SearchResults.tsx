@@ -1,8 +1,10 @@
-import React from 'react';
-
+import React, {useEffect} from 'react';
 import {useQuery} from 'react-apollo-hooks';
 import gql from 'graphql-tag';
-import styles from './ResultsTable.module.scss';
+
+import {State, Dispatch} from './state/types';
+import Table, {Column} from './Table';
+import styles from './SearchResults.module.scss';
 
 function NoImageSVG() {
     return (
@@ -119,7 +121,9 @@ export const columns = [
                 : pokemon.species.color.idName,
         className: styles['color-cell'],
         render: (value, pokemon) => (
-            <span className={styles[pokemon.species.color.idName]} title={value} />
+            <span className={styles[pokemon.species.color.idName]} title={value}>
+                {value}
+            </span>
         ),
     },
     {
@@ -170,13 +174,13 @@ const QUERY = gql`
     query(
         $lang: [String]
         $quantity: Int
+        $orderBy: [PokemonSort]
         $type: ListFilter
         $color: ID
         $shape: ID
         $generation: ID
         $species: TextFilter
         $weight: IntFilter
-        $orderBy: [PokemonSort]
     ) {
         pokemons(
             first: $quantity
@@ -238,7 +242,9 @@ const QUERY = gql`
     }
 `;
 
-export default function ResultsTable({state}) {
+type Props = {state: State; dispatch: Dispatch};
+
+export default function SearchResults({state, dispatch}: Props) {
     const {type, color, shape, generation, species, weight} = state.search.current.filter;
 
     const variables = {
@@ -268,57 +274,39 @@ export default function ResultsTable({state}) {
                 : null,
     };
 
-    let {data} = useQuery(QUERY, {variables});
+    // See docs for meaning of networkStatus numbers:
+    // https://www.apollographql.com/docs/react/api/react-apollo.html#graphql-query-data-networkStatus
+    let {data, refetch, networkStatus, errors} = useQuery(QUERY, {
+        variables,
+        notifyOnNetworkStatusChange: true,
+        suspend: false,
+    });
+
+    useEffect(() => {
+        dispatch({
+            type: 'set_is_loading',
+            value: networkStatus <= 6,
+        });
+    }, [networkStatus]);
+
+    useEffect(() => {
+        refetch();
+    }, [state.refreshCounter]);
+
+    if (networkStatus <= 6) {
+        return <div>Loading results...</div>;
+    }
+    if (errors) {
+        throw new Error(errors[0]);
+    }
 
     data = data.pokemons.edges.map((edge, index) => ({
         ...edge.node,
         index: index + 1,
     }));
-
-    return (
-        <div className={styles['output']}>
-            <Table
-                data={data}
-                columns={state.search.current.fields.map(id =>
-                    columns.find(col => col.id === id)
-                )}
-            />
-        </div>
+    const activeColumns = state.search.current.fields.map(
+        id => columns.find(col => col.id === id) as Column
     );
-}
 
-function Table({data, columns}) {
-    return (
-        <table>
-            <thead>
-                <tr>
-                    {columns.map(col => (
-                        <th key={col.id} className={col.className || null}>
-                            {col.header}
-                        </th>
-                    ))}
-                </tr>
-            </thead>
-            <tbody>
-                {data.map(row => (
-                    <tr key={row.index}>
-                        {columns.map(({accessor, id, render, className}) => {
-                            let field;
-                            if (typeof accessor === 'string') {
-                                field = row[accessor];
-                            } else if (typeof accessor === 'function') {
-                                field = accessor(row);
-                            }
-
-                            return (
-                                <td key={id} className={className || null}>
-                                    {render ? render(field, row) : field}
-                                </td>
-                            );
-                        })}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    );
+    return <Table data={data} columns={activeColumns} />;
 }

@@ -2,6 +2,10 @@ import {State, Language, SortField, Filter} from './types';
 
 export type Action =
     | {type: 'submit_pending'}
+    | {type: 'clear_pending'}
+    | {type: 'refresh'}
+    | {type: 'set_is_loading'; value: boolean}
+    | {type: 'set_print_preview'; value: boolean}
     | {type: 'set_auto_submit'; value: boolean}
     | {type: 'set_languages'; languages: Language[]}
     | {type: 'set_search_filter'; filter: Filter}
@@ -22,6 +26,14 @@ export default function reducer(state: State, action: Action): State {
                     current: state.search.pending || state.search.current,
                 },
             };
+        case 'refresh':
+            return {...state, refreshCounter: state.refreshCounter + 1};
+        case 'set_is_loading':
+            return {...state, isLoading: action.value};
+        case 'set_print_preview':
+            return {...state, printPreview: action.value};
+        case 'clear_pending':
+            return {...state, search: {...state.search, pending: null}};
         case 'set_auto_submit':
             return {...state, autoSubmit: action.value};
         case 'set_languages':

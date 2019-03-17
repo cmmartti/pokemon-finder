@@ -7,7 +7,11 @@ import VariableWidthInput from './VariableWidthInput';
 type Props = {
     value: any;
     onChange: (newValue: any) => any;
-    options: any[];
+    options: {
+        id: string;
+        label: string;
+        description?: string;
+    }[];
 };
 
 type Ref = HTMLElement;
@@ -150,13 +154,13 @@ const styleProps = {
         multiValue: () => ({}),
         multiValueLabel: () => ({}),
         multiValueRemove: () => ({}),
+        input: () => ({}),
         indicatorSeparator: () => ({}),
         indicatorsContainer: () => ({}),
         dropdownIndicator: () => ({}),
         menu: () => ({}),
         menuList: () => ({}),
         option: () => ({}),
-        input: () => ({}),
     },
 };
 

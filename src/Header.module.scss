@@ -1,0 +1,46 @@
+@import 'shared';
+
+.header {
+    color: $grey-8;
+    align-items: baseline;
+
+    a {
+        text-decoration: underline;
+        color: inherit;
+        display: inline-block;
+        &:hover {
+            color: $blue-6;
+        }
+    }
+
+    .top {
+        display: flex;
+        align-items: baseline;
+        // flex-wrap: wrap;
+        justify-content: space-between;
+
+        .title {
+            color: $purple-9;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            margin-right: 1em;
+
+            h1 {
+                font-size: 2em;
+                margin: 0 0.35em 0 0;
+            }
+            p {
+                font-size: 1.3em;
+                margin: 0;
+            }
+        }
+        .language {
+            white-space: nowrap;
+        }
+    }
+
+    .links {
+        margin: 0.25em 0;
+    }
+}

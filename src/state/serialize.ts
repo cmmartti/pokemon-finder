@@ -13,6 +13,10 @@ import {
 
 type Flat = {[index: string]: string | null};
 
+/*
+   Turn a State object into a flat object of key/string value pairs, excluding
+   non-relevant data.
+*/
 export function flattenState(state: State): Flat {
     const search = state.search.current;
     const flat = {
@@ -123,7 +127,7 @@ function encode(value: Value): string | null {
     }
 }
 
-export function decode(template: Value, string: string | null, active): Value {
+function decode(template: Value, string: string | null, active): Value {
     const {type} = template;
     switch (type) {
         case 'StringMatch':
@@ -182,7 +186,7 @@ function encodeArray(array: string[]): string {
     return array.join('_');
 }
 
-export function decodeArray(arrayStr: string | null): string[] {
+function decodeArray(arrayStr: string | null): string[] {
     if (!arrayStr) return [];
     return arrayStr.split('_').map(item => item);
 }

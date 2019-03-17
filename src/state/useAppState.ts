@@ -4,13 +4,14 @@ import {stringify, parse as parseQuery} from 'query-string';
 
 import reducer, {Action} from './reducer';
 import {
+    Dispatch,
     State,
     createString,
     createStringMatch,
     createNumberMatch,
     createArrayMatch,
 } from './types';
-import {flattenState, unflattenState, decodeArray} from './serialize';
+import {flattenState, unflattenState} from './serialize';
 
 const defaultSearch = {
     fields: ['veekun', 'species', 'image-fd', 'type', 'generation'],
@@ -32,46 +33,42 @@ const defaultState = {
         pending: null,
         default: defaultSearch,
     },
+    refreshCounter: 0,
+    isLoading: false,
+    printPreview: false,
 };
 
-type Props = {
-    children: (state: State, dispatch: (action: Action) => void) => any;
-    history: History;
-};
-
-export default function StateManager({children, history}: Props) {
+export default function useAppState(history: History): [State, Dispatch] {
     function saveState(state: State): void {
         history.push(history.location.pathname + '?' + stringify(flattenState(state)));
         try {
             localStorage.setItem('state', JSON.stringify(state));
         } catch {
-            // ignore write errors
+            // ignore localStorage write errors
         }
     }
-    function loadState(): State | null {
+    function loadState(): State {
+        let initialState = defaultState;
         try {
             const stateJSON = localStorage.getItem('state');
-            if (stateJSON === null) return null;
-            return JSON.parse(stateJSON);
+            if (stateJSON !== null) {
+                initialState = JSON.parse(stateJSON);
+            }
         } catch {
-            return null;
+            // ignore localStorage read errors
         }
-    }
-    function lazyInit() {
-        const initialState = loadState() || defaultState;
         return unflattenState(initialState, parseQuery(history.location.search));
     }
 
-    const [state, dispatch] = useReducer(reducer, undefined, lazyInit);
+    const [state, dispatch] = useReducer(reducer, undefined, loadState);
     saveState(state);
 
-    return children(state as State, function(action: Action) {
-        dispatch(action);
-        saveState(state);
-    });
+    return [
+        state as State,
+        function(action) {
+            console.log(action);
+            dispatch(action);
+            saveState(state);
+        } as Dispatch,
+    ];
 }
-
-export type StateProps = {
-    state: State;
-    dispatch(action: Action): void;
-};

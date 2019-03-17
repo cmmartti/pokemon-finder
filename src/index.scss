@@ -9,12 +9,16 @@ html,
     cursor: auto;
 }
 
+html {
+    background-color: $grey-2;
+}
 body {
-    padding: 1.5em;
+    border: solid $purple-5;
+    border-width: 6px 0 6px 0;
+    padding: 0.5em 1.25em;
     color: $grey-9;
     max-width: 70em;
     margin: 0 auto;
-    background-color: $grey-2;
     scrollbar-gutter: both;
 }
 
@@ -43,50 +47,16 @@ nobr {
     color: $grey-6;
 }
 
-.site-header {
-    text-align: center;
-    position: relative;
-    max-width: 65em;
-    margin: 0 auto;
-
-    &::before,
-    &::after {
-        content: '';
-        display: block;
-        height: 1.5em;
-        width: 1.5em;
-        border: solid hsl(0, 0%, 0%);
-        position: absolute;
-        top: -0.15em;
-    }
-    &::before {
-        border-width: 2px 0 0 2px;
-        left: -0.15em;
-    }
-    &::after {
-        border-width: 2px 2px 0 0;
-        right: -0.15em;
-    }
-
-    &__title {
-        font-size: 1.75em;
-        font-weight: normal;
-        letter-spacing: 0.025em;
-        margin: 0;
-    }
-    &__subtitle {
-        font-size: 1em;
-        font-weight: normal;
-        margin: 0.25em 0;
-    }
-}
-
 /*
   This will hide the focus indicator if the element receives focus via the mouse,
   but it will still show up on keyboard focus. This is using the focus-visible polyfill.
 */
 .js-focus-visible :focus:not([data-focus-visible-added]) {
     outline: none !important;
+}
+
+*:focus {
+    outline: 2px dashed $purple-7;
 }
 
 @media print {

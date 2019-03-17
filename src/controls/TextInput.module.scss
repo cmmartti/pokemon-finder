@@ -52,8 +52,6 @@
     width: max-content;
     min-width: 8em;
     overflow: auto;
-    max-height: 22em;
-    // scrollbar-width: thin;
 
     @media (max-height: 40em) {
         max-height: 14em;

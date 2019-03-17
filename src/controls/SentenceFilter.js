@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 
 import Menu from './Menu';
 import styles from './SentenceFilter.module.scss';
@@ -47,45 +46,83 @@ function MenuButton({innerRef, innerProps, menuIsOpen}) {
  * function with some prop types.
  *
  **************************************************************************************/
+// type SentencePartProps = {
+//     render: string | ((ref: any) => any);
+//     id?: string;
+//     main?: boolean;
+// };
+export function SentencePart(props) {
+    return null;
+}
 
-export default function SentenceFilter({parameters, children, setActive}) {
+// type Props = {
+//     parameters: {[id: string]: {name: string; active: boolean}};
+//     children?: React.ReactChild;
+//     status?: string;
+//     setActive: (key: string, active: boolean) => any;
+// };
+
+export default function SentenceFilter({
+    status = '',
+    parameters = {},
+    children = null,
+    setActive = (key, active) => {},
+}) {
     const partRefs = useRef({});
 
     // Try to focus the parameter's main sentence part after it is activated
     const [newParameter, setNewParameter] = useState(null);
     useEffect(() => {
-        const element = partRefs.current[newParameter];
-        if (element && typeof element.focus === 'function') {
-            element.focus();
+        if (newParameter !== null) {
+            const element = partRefs.current[newParameter];
+            if (element && typeof element.focus === 'function') {
+                element.focus();
+            }
         }
     }, [newParameter]);
+
+    if (status) {
+        return (
+            <div className={styles['sentence-filter']}>
+                <div className={styles['sentence']}>{status}</div>
+
+                <Menu
+                    Button={MenuButton}
+                    className={styles['menu']}
+                    classNames={{
+                        menuItem: styles['menu-item'],
+                        list: styles['menu-list'],
+                    }}
+                    items={[]}
+                    label="Change filter"
+                />
+            </div>
+        );
+    }
 
     const sentenceParts = [];
     const menuParameters = [];
 
     React.Children.forEach(children, part => {
-        const {id, text, render, main, fixed} = part.props;
-
-        if (!id) {
-            sentenceParts.push(text);
-        } //
-        else if (parameters[id].active || fixed) {
-            if (render) {
-                let ref;
-                if (main) {
-                    ref = element => (partRefs.current[id] = element);
-                }
-                sentenceParts.push(
-                    <React.Fragment key={`${id}_${render.name}`}>
-                        {render(ref)}
-                    </React.Fragment>
-                );
-            } else {
-                sentenceParts.push(text);
-            }
+        if (part.type !== SentencePart) {
+            const type = part.type || typeof part;
+            throw new Error(
+                `SentenceFilter children should be of type 'SentencePart', not '${type}'.`
+            );
         }
 
-        if (main && !fixed) {
+        const {id, render, children, main} = part.props;
+        if (!id || parameters[id].active) {
+            if (typeof render === 'function') {
+                const ref = element => (partRefs.current[id] = element);
+                sentenceParts.push(
+                    <React.Fragment key={`${id}_${render.name}`}>
+                        {main ? render(ref) : render()}
+                    </React.Fragment>
+                );
+            } else sentenceParts.push(children);
+        }
+        if (main) {
             menuParameters.push({...parameters[id], id});
         }
     });
@@ -95,7 +132,7 @@ export default function SentenceFilter({parameters, children, setActive}) {
     );
 
     return (
-        <div className={styles['parameter-list']}>
+        <div className={styles['sentence-filter']}>
             <div className={styles['sentence']}>{sentenceParts}</div>
 
             <Menu
@@ -120,31 +157,3 @@ export default function SentenceFilter({parameters, children, setActive}) {
         </div>
     );
 }
-
-SentenceFilter.propTypes = {
-    parameters: PropTypes.objectOf(
-        PropTypes.shape({
-            name: PropTypes.string.isRequired,
-            active: PropTypes.bool.isRequired,
-        })
-    ),
-    children: (props, propName, componentName) => {
-        React.Children.forEach(props[propName], child => {
-            if (child.type !== SentencePart) {
-                const type = child.type || typeof child;
-                return new Error(
-                    `'${componentName}' children should be of type 'Part', not '${type}'.`
-                );
-            }
-        });
-    },
-};
-
-export const SentencePart = () => null;
-SentencePart.propTypes = {
-    text: PropTypes.string,
-    render: PropTypes.func,
-    id: PropTypes.string,
-    main: PropTypes.bool,
-    keepWithNext: PropTypes.bool,
-};

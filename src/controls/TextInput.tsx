@@ -25,14 +25,22 @@ function Option({innerProps, isFocused, text, search}) {
 }
 
 type Props = {
-    value: string;
+    submitOnChange?: boolean;
+    forwardedRef?: any;
     onChange(newValue: string): any;
     onSubmit(newValue: string): any;
     suggestions?: string[];
-    forwardedRef?: any;
+    value: string;
 };
 
-function TextInput({value, onChange, onSubmit, suggestions = [], forwardedRef}: Props) {
+function TextInput({
+    submitOnChange = false,
+    forwardedRef,
+    onChange,
+    onSubmit,
+    suggestions = [],
+    value,
+}: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const containerRef = useRef(null);
     useOnClickOutside(containerRef, close);
@@ -69,7 +77,9 @@ function TextInput({value, onChange, onSubmit, suggestions = [], forwardedRef}: 
                 close();
                 break;
             case 'Enter':
-                event.preventDefault();
+                if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+                    event.preventDefault();
+                }
                 submit(inputValue);
                 break;
             case 'ArrowUp':
@@ -130,10 +140,14 @@ function TextInput({value, onChange, onSubmit, suggestions = [], forwardedRef}: 
     }
 
     function handleChange(event) {
-        setInputValue(event.target.value);
-        setTyped(event.target.value);
+        const text = event.target.value;
+        setInputValue(text);
+        setTyped(text);
         setIsOpen(true);
-        onChange(event.target.value);
+        onChange(text);
+        if (submitOnChange) {
+            onSubmit(text);
+        }
     }
 
     return (
@@ -162,6 +176,7 @@ function TextInput({value, onChange, onSubmit, suggestions = [], forwardedRef}: 
                             isFocused={focused === text}
                             innerProps={{
                                 onClick: () => submit(text),
+                                onMouseDown: event => event.preventDefault(),
                                 onMouseEnter: () => setFocused(text),
                                 'aria-selected': focused === text,
                             }}
