@@ -15,8 +15,8 @@ import SearchResults from './SearchResults';
 import './index.scss';
 
 const history = createHistory();
-const client = new ApolloClient({uri: 'http://localhost:8000/graphql'});
-// const client = new ApolloClient({uri: 'http://192.168.2.76:801/graphql'});
+// const client = new ApolloClient({uri: 'http://localhost:8000/graphql'});
+const client = new ApolloClient({uri: 'http://pokeapi.charlesmarttinen.ca/graphql'});
 
 function Application() {
     const [state, dispatch] = useAppState(history);
