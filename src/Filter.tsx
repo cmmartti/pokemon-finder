@@ -8,7 +8,7 @@ import NumberInput from './controls/NumberInput';
 import SentenceFilter, {SentencePart as Part} from './controls/SentenceFilter';
 import {
     Filter as FilterType,
-    State,
+    Language,
     Dispatch,
     createString,
     createNumber,
@@ -71,7 +71,7 @@ const arrayMatchOptions = [
 const numberMatchOptions = [
     {id: 'lt', label: 'less than'},
     {id: 'eq', label: 'equal to'},
-    {id: 'gt', label: 'greater than'},
+    {id: 'gt', label: 'more than'},
 ];
 const stringMatchOptions = [
     {id: 'has', label: 'contain'},
@@ -79,13 +79,22 @@ const stringMatchOptions = [
     {id: 'eq', label: 'exactly match'},
 ];
 
-type Props = {state: State; dispatch: Dispatch; filter: FilterType};
+type Props = {
+    dispatch: Dispatch;
+    filter: FilterType;
+    languages: Language[];
+    submitOnChange: boolean;
+};
 
-export default function Filter({filter, state, dispatch}: Props) {
-    const {data, loading} = useQuery(QUERY, {
-        variables: {lang: state.languages},
+export default function Filter({filter, languages, submitOnChange, dispatch}: Props) {
+    const {data, loading, error} = useQuery(QUERY, {
+        variables: {lang: languages},
         suspend: false,
     });
+
+    if (error) {
+        return <SentenceFilter status="Loading failed. " />;
+    }
 
     if (loading) {
         return <SentenceFilter status="Loading filter…" />;
@@ -224,21 +233,21 @@ export default function Filter({filter, state, dispatch}: Props) {
     const renderSpecies = ref => (
         <SpeciesTextInput
             innerRef={ref}
-            languages={state.languages}
+            languages={languages}
             onSubmit={val =>
                 update(
                     'species',
                     createStringMatch(species.active, val, species.value.match)
                 )
             }
-            submitOnChange={!state.autoSubmit}
+            submitOnChange={submitOnChange}
             value={species.value.string}
             match={species.value.match}
         />
     );
 
     // Partial French translation
-    if (state.languages[0] === 'fr') {
+    if (languages[0] === 'fr') {
         return (
             <SentenceFilter
                 setActive={setActive}

@@ -1,8 +1,9 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useQuery} from 'react-apollo-hooks';
 import gql from 'graphql-tag';
+import {Query} from 'react-apollo';
 
-import {State, Dispatch} from './state/types';
+import {State, Dispatch, Search, Language} from './state/types';
 import Table, {Column} from './Table';
 import styles from './SearchResults.module.scss';
 
@@ -242,17 +243,26 @@ const QUERY = gql`
     }
 `;
 
-type Props = {state: State; dispatch: Dispatch};
+type Props = {
+    languages: Language[];
+    currentSearch: Search;
+    refreshCounter: number;
+    dispatch: Dispatch;
+};
 
-export default function SearchResults({state, dispatch}: Props) {
-    const {type, color, shape, generation, species, weight} = state.search.current.filter;
-
+export default function SearchResults({
+    languages,
+    currentSearch,
+    refreshCounter,
+    dispatch,
+}: Props) {
+    const {type, color, shape, generation, species, weight} = currentSearch.filter;
     const variables = {
-        lang: state.languages,
-        orderBy: state.search.current.sort.map(o => {
+        lang: languages,
+        orderBy: currentSearch.sort.map(o => {
             // return {order: o.reverse ? 'DESC' : 'ASC', id: o.id};
             return {
-                order: state.search.current.sort[0].reverse ? 'DESC' : 'ASC',
+                order: currentSearch.sort[0].reverse ? 'DESC' : 'ASC',
                 field: o.id,
             };
         }),
@@ -266,7 +276,7 @@ export default function SearchResults({state, dispatch}: Props) {
         generation: generation.active ? generation.value : null,
         species:
             species.active && species.value !== null
-                ? {[species.value.match]: species.value.string, lang: state.languages[0]}
+                ? {[species.value.match]: species.value.string, lang: languages[0]}
                 : null,
         weight:
             weight.active && weight.value !== null
@@ -274,39 +284,43 @@ export default function SearchResults({state, dispatch}: Props) {
                 : null,
     };
 
-    // See docs for meaning of networkStatus numbers:
-    // https://www.apollographql.com/docs/react/api/react-apollo.html#graphql-query-data-networkStatus
-    let {data, refetch, networkStatus, errors} = useQuery(QUERY, {
+    const [bypassCache, setBypassCache] = useState(false);
+    const [savedData, setSavedData] = useState<any | void>(null);
+
+    let {data, refetch, loading, error} = useQuery(QUERY, {
         variables,
-        notifyOnNetworkStatusChange: true,
-        suspend: false,
+        fetchPolicy: bypassCache ? 'network-only' : 'cache-first',
     });
 
     useEffect(() => {
-        dispatch({
-            type: 'set_is_loading',
-            value: networkStatus <= 6,
-        });
-    }, [networkStatus]);
+        if (!loading && !error) {
+            setSavedData(data);
+            setBypassCache(false);
+        }
+    }, [loading, error, data]);
+
+    // useEffect(() => {
+    //     console.log('Loading:', loading);
+    //     dispatch({type: 'set_is_loading', value: loading});
+    // }, [loading]);
 
     useEffect(() => {
+        setBypassCache(true);
         refetch();
-    }, [state.refreshCounter]);
+    }, [refreshCounter]);
 
-    if (networkStatus <= 6) {
-        return <div>Loading results...</div>;
+    if (savedData) {
+        return (
+            <Table
+                data={savedData.pokemons.edges.map((edge, index) => ({
+                    ...edge.node,
+                    index: index + 1,
+                }))}
+                columns={currentSearch.fields.map(
+                    id => columns.find(col => col.id === id) as Column
+                )}
+            />
+        );
     }
-    if (errors) {
-        throw new Error(errors[0]);
-    }
-
-    data = data.pokemons.edges.map((edge, index) => ({
-        ...edge.node,
-        index: index + 1,
-    }));
-    const activeColumns = state.search.current.fields.map(
-        id => columns.find(col => col.id === id) as Column
-    );
-
-    return <Table data={data} columns={activeColumns} />;
+    return null;
 }

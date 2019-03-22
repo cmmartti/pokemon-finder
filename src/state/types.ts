@@ -4,6 +4,7 @@ export type Dispatch = (action: Action) => void;
 
 // State tree
 export type State = {
+    readonly isOffline: boolean;
     readonly autoSubmit: boolean;
     readonly languages: Language[];
     readonly search: {
@@ -13,7 +14,6 @@ export type State = {
     };
     readonly refreshCounter: number;
     readonly isLoading: boolean;
-    readonly printPreview: boolean;
 };
 export type Language = string;
 export type Search = {

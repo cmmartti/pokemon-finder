@@ -36,9 +36,9 @@ function convertSort(sortOptions, sort) {
     return s;
 }
 
-type Props = {state: State; dispatch: Dispatch};
+type Props = {state: State; dispatch: Dispatch; isLoading: boolean};
 
-function SearchSettings({state, dispatch}: Props) {
+function SearchSettings({state, dispatch, isLoading}: Props) {
     function handleKeyPress(event) {
         if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
             if (state.search.pending) {
@@ -111,13 +111,12 @@ function SearchSettings({state, dispatch}: Props) {
             <div className={styles['settings']}>
                 <Section label="Filter">
                     <Filter
-                        state={state}
+                        languages={state.languages}
                         dispatch={dispatch}
-                        filter={
-                            state.search.pending
-                                ? state.search.pending.filter
-                                : state.search.current.filter
-                        }
+                        filter={search.filter}
+                        // Don't submit the filter on every keypress unless the entire
+                        // search is in manual submit mode:
+                        submitOnChange={!state.autoSubmit}
                     />
                 </Section>
                 <Section label="Sort">
@@ -144,7 +143,7 @@ function SearchSettings({state, dispatch}: Props) {
                 </Section>
                 <div className={styles['submit-section']}>
                     <div className={styles['status']}>
-                        {state.isLoading && (
+                        {isLoading && (
                             <div
                                 className={styles['loading-spinner']}
                                 title="Loading"

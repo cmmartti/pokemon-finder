@@ -1,36 +1,57 @@
-import React from 'react';
+import React, {useState, useReducer, useEffect} from 'react';
 import ReactDOM from 'react-dom';
-import ApolloClient from 'apollo-boost';
-import {ApolloProvider} from 'react-apollo';
-import {ApolloProvider as ApolloProviderHooks} from 'react-apollo-hooks';
 import createHistory from 'history/createBrowserHistory';
 import 'sanitize.css';
 import 'focus-visible/dist/focus-visible.min.js';
 
-import GlobalErrorBoundary from './GlobalErrorBoundary';
-import useAppState from './state/useAppState';
-import Header from './Header';
-import SearchSettings from './SearchSettings';
-import SearchResults from './SearchResults';
+import {ApolloClient} from 'apollo-client';
+import {ApolloLink} from 'apollo-link';
+import {HttpLink} from 'apollo-link-http';
+// import {onError} from 'apollo-link-error';
+import {InMemoryCache} from 'apollo-cache-inmemory';
+import {ApolloProvider} from 'react-apollo';
+import {ApolloProvider as ApolloProviderHooks} from 'react-apollo-hooks';
+import {createNetworkStatusNotifier} from 'react-apollo-network-status';
+
+import App from './App';
+import ErrorBoundary from './ErrorBoundary';
 import './index.scss';
 
-const history = createHistory();
-// const client = new ApolloClient({uri: 'http://localhost:8000/graphql'});
-const client = new ApolloClient({uri: 'http://pokeapi.charlesmarttinen.ca/graphql'});
+const {
+    NetworkStatusNotifier,
+    link: networkStatusNotifierLink,
+} = createNetworkStatusNotifier();
 
-function Application() {
-    const [state, dispatch] = useAppState(history);
+const client = new ApolloClient({
+    link: ApolloLink.from([
+        networkStatusNotifierLink,
+        new HttpLink({uri: 'http://pokeapi.charlesmarttinen.ca/graphql'}),
+    ]),
+    cache: new InMemoryCache(),
+});
+
+const history = createHistory();
+
+function Index() {
+    // Force an update if the URL changes
+    // const [, forceUpdate] = useReducer(x => x + 1, 0);
+    // useEffect(() => {
+    //     history.listen(() => forceUpdate({}));
+    // }, []);
+
     return (
-        <GlobalErrorBoundary>
+        <ErrorBoundary>
             <ApolloProvider client={client}>
                 <ApolloProviderHooks client={client}>
-                    <Header state={state} dispatch={dispatch} />
-                    <SearchSettings state={state} dispatch={dispatch} />
-                    <SearchResults state={state} dispatch={dispatch} />
+                    <NetworkStatusNotifier
+                        render={({loading, error}) => (
+                            <App history={history} isLoading={loading} error={error} />
+                        )}
+                    />
                 </ApolloProviderHooks>
             </ApolloProvider>
-        </GlobalErrorBoundary>
+        </ErrorBoundary>
     );
 }
 
-ReactDOM.render(<Application />, document.getElementById('root'));
+ReactDOM.render(<Index />, document.getElementById('root'));

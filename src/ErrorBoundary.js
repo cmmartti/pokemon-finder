@@ -1,6 +1,6 @@
 import React from 'react';
 
-class GlobalErrorBoundary extends React.Component {
+export default class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
         this.state = {error: null};
@@ -19,7 +19,7 @@ class GlobalErrorBoundary extends React.Component {
             console.error(this.state.error);
             return (
                 <div>
-                    <h1>Uh oh!</h1>
+                    <h2>Uh oh!</h2>
                     <p>Pokémon Finder has encountered this error at the following URL:</p>
                     <p className="error-message">{this.state.error.message}</p>
                     <p className="error-message">
@@ -39,5 +39,3 @@ class GlobalErrorBoundary extends React.Component {
         return this.props.children;
     }
 }
-
-export default GlobalErrorBoundary;

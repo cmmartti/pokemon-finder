@@ -10,9 +10,9 @@ export type Column = {
     className?: string;
 };
 
-type Props = {data: any[]; columns: Column[]};
+type Props = {data: any[]; columns: Column[]; noResultsMessage?: any};
 
-export default function Table({data, columns}: Props) {
+export default function Table({data, columns, noResultsMessage = 'No results'}: Props) {
     return (
         <div className={styles['scroll-wrapper']}>
             <table>
@@ -26,32 +26,38 @@ export default function Table({data, columns}: Props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map(row => (
-                        <tr key={row.index}>
-                            {columns.map(({accessor, id, render, className}) => {
-                                let field;
-                                if (typeof accessor === 'string') {
-                                    field = row[accessor];
-                                } else if (typeof accessor === 'function') {
-                                    field = accessor(row);
-                                }
+                    {data.length > 0 ? (
+                        data.map(row => (
+                            <tr key={row.index}>
+                                {columns.map(({accessor, id, render, className}) => {
+                                    let field;
+                                    if (typeof accessor === 'string') {
+                                        field = row[accessor];
+                                    } else if (typeof accessor === 'function') {
+                                        field = accessor(row);
+                                    }
 
-                                // if (typeof render === 'function') {
-                                //     return (
-                                //         <React.Fragment key={id}>
-                                //             {render(field, row)}
-                                //         </React.Fragment>
-                                //     );
-                                // }
+                                    // if (typeof render === 'function') {
+                                    //     return (
+                                    //         <React.Fragment key={id}>
+                                    //             {render(field, row)}
+                                    //         </React.Fragment>
+                                    //     );
+                                    // }
 
-                                return (
-                                    <td key={id} className={className}>
-                                        {render ? render(field, row) : field}
-                                    </td>
-                                );
-                            })}
+                                    return (
+                                        <td key={id} className={className}>
+                                            {render ? render(field, row) : field}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={columns.length}>{noResultsMessage}</td>
                         </tr>
-                    ))}
+                    )}
                 </tbody>
             </table>
         </div>
