@@ -25,7 +25,7 @@ export default function Header({state, dispatch}: Props) {
         <header className={styles['header']}>
             <div className={styles['top']}>
                 <div className={styles['title']}>
-                    <h1>Reporter</h1>
+                    <h1>Pokémon Finder</h1>
                     <p>
                         by <a href="https://charlesmarttinen.ca">Charles Marttinen</a>
                     </p>
