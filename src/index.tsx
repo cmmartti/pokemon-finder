@@ -25,7 +25,7 @@ const {
 const client = new ApolloClient({
     link: ApolloLink.from([
         networkStatusNotifierLink,
-        new HttpLink({uri: 'http://pokeapi.charlesmarttinen.ca/graphql'}),
+        new HttpLink({uri: 'https://pokeapi.charlesmarttinen.ca/graphql'}),
     ]),
     cache: new InMemoryCache(),
 });
