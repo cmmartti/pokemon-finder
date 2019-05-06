@@ -2,7 +2,7 @@
 
 A dynamic reporting application based on a GraphQL API I also build (based on [PokéAPI](https://pokeapi.co)).
 
-**Live demo at [https://pokemon-finder.netlify.com])(pokemon-finder.netlify.com).**
+**Live demo at [https://pokemon-finder.netlify.com](pokemon-finder.netlify.com).**
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
