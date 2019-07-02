@@ -1,0 +1,273 @@
+@import 'shared';
+
+.settings {
+    // box-shadow: 1px 2px 6px rgba($grey-9, 0.3);
+    margin: 1em 0 1.5em 0;
+    border: solid $purple-3;
+    border-width: 2px 2px 0 0;
+}
+
+.section {
+    display: flex;
+    align-items: stretch;
+
+    .name {
+        background-color: $purple-3;
+        color: $purple-9;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1em;
+        user-select: none;
+
+        flex: 0;
+        min-width: 4em;
+        padding: 0.7em 0.5em;
+        text-align: right;
+    }
+
+    .content {
+        flex: 1 0;
+        min-width: 0;
+        background-color: white;
+    }
+
+    & + & {
+        border-top: 1px solid $purple-3;
+    }
+
+    @media (max-width: 40em) {
+        .name {
+            min-width: auto;
+            text-align: center;
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
+            padding: 0.5em 0.25em;
+            font-size: 0.95em;
+        }
+    }
+}
+.submit-section {
+    color: $purple-9;
+    min-height: 2em;
+
+    display: flex;
+    align-items: stretch;
+
+    .status {
+        flex: 0;
+        min-width: 4em;
+        text-align: center;
+        background-color: $purple-2;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .controls {
+        flex: 1 0;
+        min-width: 0;
+        padding: 0.45em 0 0.45em 0.5em;
+        align-items: stretch;
+        background-color: $purple-3;
+
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        > * {
+            margin-right: 0.5em;
+        }
+        .spring-spacer {
+            margin: 0;
+            flex: 1 0;
+            min-width: 0;
+        }
+    }
+}
+
+.button {
+    border: none;
+    color: white;
+    background-color: $purple-5;
+    padding: 0.15em 0.35em;
+    border-radius: 0.15em;
+
+    &:focus {
+        outline: 2px dashed $purple-7;
+    }
+    &:not(:disabled) {
+        &:hover {
+            background-color: $purple-6;
+        }
+        &:active {
+            background-color: $purple-7;
+            svg {
+                transform: scale(0.92);
+            }
+        }
+    }
+    &:disabled {
+        color: $purple-6;
+    }
+
+    &--alert {
+        display: flex;
+        position: relative;
+        padding-left: 0.5em;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: -0.25em;
+            width: 0.7em;
+            height: 0.7em;
+            border-radius: 100%;
+            margin-right: 0.25em;
+            align-self: center;
+
+            border: 2px solid $purple-5;
+            background-color: $yellow-3;
+        }
+        &:hover::before {
+            border-color: $purple-6;
+        }
+        &:active::before {
+            border-color: $purple-7;
+        }
+    }
+}
+
+.link-button {
+    align-items: normal;
+    background-color: rgba(0, 0, 0, 0);
+    border-style: none;
+    box-sizing: content-box;
+    color: $blue-7;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline;
+    font: inherit;
+    font-size: 0.9em;
+    height: auto;
+    padding: 0;
+    perspective-origin: 0 0;
+    text-align: start;
+    text-decoration: underline;
+    transform-origin: 0 0;
+    width: auto;
+    -moz-appearance: none;
+
+    /* Chrome ignores auto, so we have to use this hack to set the correct height  */
+    -webkit-logical-height: 1em;
+    /* Chrome ignores auto, but here for completeness */
+    -webkit-logical-width: auto;
+
+    /* Mozilla uses a pseudo-element to show focus on buttons, */
+    /* but anchors are highlighted via the focus pseudo-class. */
+    @supports (-moz-appearance: none) {
+        &::-moz-focus-inner {
+            border: none;
+            padding: 0;
+        }
+        &:focus {
+            outline-style: dotted;
+            outline-width: 1px;
+        }
+    }
+}
+
+.loading-spinner {
+    position: relative;
+    width: 3.5em;
+    height: 2em;
+
+    $offset: 0.5em;
+    $line-width: 2px;
+
+    // Track
+    &::before {
+        content: '';
+        position: absolute;
+        top: $offset;
+        right: $offset;
+        bottom: $offset;
+        left: $offset;
+        border: #{$line-width} solid $purple-5;
+        border-radius: 0.25em;
+    }
+
+    // Moving dot
+    &::after {
+        content: '';
+        position: absolute;
+        top: calc(#{$offset} / 2 + #{$line-width} / 2);
+        left: calc(#{$offset} / 2 + #{$line-width} / 2);
+        width: 0.5em;
+        height: 0.5em;
+        border-radius: 100%;
+        background-color: $purple-7;
+        animation: circumnavigate 1s linear -1s infinite both;
+    }
+    @keyframes circumnavigate {
+        $x-distance: calc(3.5em - (#{$offset} * 2) - #{$line-width});
+        $y-distance: calc(2em - (#{$offset} * 2) - #{$line-width});
+        28.57% {
+            // (50 / 3.5)
+            transform: translateX($x-distance);
+        }
+        50% {
+            transform: translateX($x-distance) translateY($y-distance);
+        }
+        78.57% {
+            // (50 / 3.5 + 50)
+            transform: translateX(0) translateY($y-distance);
+        }
+    }
+}
+
+.sort-button {
+    border: none;
+    color: inherit;
+    background-color: $yellow-4;
+    padding: 0 0.25em;
+    display: flex;
+    align-items: center;
+    svg {
+        height: 1em;
+        width: 1em;
+    }
+
+    &:focus {
+        outline: 2px dashed $yellow-6;
+    }
+    &:not(:disabled) {
+        &:hover {
+            background-color: $yellow-5;
+        }
+        &:active {
+            background-color: $yellow-5;
+            svg {
+                transform: scale(0.92);
+            }
+        }
+    }
+    &:disabled {
+        color: $yellow-6;
+    }
+}
+
+.sort-theme.sort-theme {
+    --si-text-color: #{$yellow-9};
+    --si-button-color: #{$yellow-5};
+    --si-background-color: #{$yellow-1};
+    --si-focus-outline-color: #{$yellow-6};
+    --si-option-background-color: #{$yellow-3};
+}
+.field-theme.field-theme {
+    --si-text-color: #{$green-9};
+    --si-button-color: #{$green-5};
+    --si-background-color: #{$green-1};
+    --si-focus-outline-color: #{$green-6};
+    --si-option-background-color: #{$green-3};
+}

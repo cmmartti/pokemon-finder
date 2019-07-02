@@ -1,0 +1,50 @@
+@import 'shared';
+
+.scroll-wrapper {
+    overflow: auto;
+    padding-bottom: 1em;
+
+    table {
+        max-width: 75em;
+        width: 100%;
+        margin: 0 auto;
+        border-collapse: separate;
+        border-spacing: 0;
+
+        th {
+            padding: 0.5em;
+            background-color: $purple-2;
+            color: $purple-9;
+            font-weight: 600;
+            font-size: 0.9em;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            text-align: left;
+
+            color-adjust: exact;
+        }
+        th + th {
+            border-left: 1px solid $purple-3;
+        }
+
+        //// Sticky headers don't work with horizontal scrolling, unfortunately
+        // thead tr:first-child th {
+        //     position: sticky;
+        //     top: 0;
+        //     z-index: 2;
+        // }
+
+        td {
+            padding: 0.25em 0.5em;
+            text-align: left;
+            background-color: white;
+        }
+        td + td {
+            border-left: 1px solid $grey-3;
+        }
+
+        tr:not(:last-child) td {
+            border-bottom: 1px solid $grey-4;
+        }
+    }
+}

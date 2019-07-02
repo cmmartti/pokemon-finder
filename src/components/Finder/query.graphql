@@ -1,0 +1,74 @@
+query(
+    $lang: String
+    $orderBy: [PokemonSort]
+    $type: ListFilter
+    $color: ID
+    $shape: ID
+    $generation: ID
+    $species: TextFilter
+    $weight: IntFilter
+) {
+    pokemons(
+        first: 1000
+        where: {
+            types: $type
+            species: {
+                color__idName: [$color]
+                shape__idName: [$shape]
+                generation__idName: [$generation]
+                name: $species
+            }
+            weight: $weight
+        }
+        orderBy: $orderBy
+    ) {
+        totalCount
+        edges {
+            node {
+                idName
+                isDefault
+                weight
+                height
+                order
+                types {
+                    order
+                    type {
+                        idName
+                        names(lang: [$lang]) {
+                            text
+                        }
+                    }
+                }
+                species {
+                    names(lang: [$lang]) {
+                        text
+                    }
+                    color {
+                        idName
+                        names(lang: [$lang]) {
+                            text
+                        }
+                    }
+                    generation {
+                        idName
+                        names(lang: [$lang]) {
+                            text
+                        }
+                    }
+                    shape {
+                        idName
+                        names(lang: [$lang]) {
+                            text
+                        }
+                    }
+                }
+                sprites {
+                    frontDefault
+                    frontShiny
+                    backDefault
+                    backShiny
+                }
+            }
+        }
+    }
+}
