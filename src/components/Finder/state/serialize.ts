@@ -132,7 +132,7 @@ function decode(string: string | null, type: Value['type']): Value {
                 const match = string.match(/^(has|sw|eq)~(.*)$/);
                 if (match)
                     return {
-                        type: 'StringMatch' as const,
+                        type: 'StringMatch' as 'StringMatch,
                         value: {
                             string: match[2],
                             match: match[1] as 'has' | 'sw' | 'eq',
@@ -140,7 +140,7 @@ function decode(string: string | null, type: Value['type']): Value {
                     };
             }
             return {
-                type: 'StringMatch' as const,
+                type: 'StringMatch' as 'StringMatch,
                 value: {
                     string: null,
                     match: 'has',
@@ -152,7 +152,7 @@ function decode(string: string | null, type: Value['type']): Value {
                 if (match) {
                     const number = parseFloat(match[2]);
                     return {
-                        type: 'NumberMatch' as const,
+                        type: 'NumberMatch' as 'NumberMatch',
                         value: {
                             number: isNaN(number) ? null : number,
                             match: match[1] as 'lt' | 'gt' | 'eq',
@@ -160,13 +160,13 @@ function decode(string: string | null, type: Value['type']): Value {
                     };
                 }
             }
-            return {type: 'NumberMatch' as const, value: {number: null, match: 'eq'}};
+            return {type: 'NumberMatch' as 'NumberMatch', value: {number: null, match: 'eq'}};
         case 'ArrayMatch':
             if (string !== null) {
                 const match = string.match(/^(all|some|eq)~(.*)$/);
                 if (match)
                     return {
-                        type: 'ArrayMatch' as const,
+                        type: 'ArrayMatch' as 'ArrayMatch',
                         value: {
                             array: decodeArray(match[2]),
                             match: match[1] as 'all' | 'some' | 'eq',
@@ -174,7 +174,7 @@ function decode(string: string | null, type: Value['type']): Value {
                     };
             }
             return {
-                type: 'ArrayMatch' as const,
+                type: 'ArrayMatch' as 'ArrayMatch',
                 value: {
                     array: [],
                     match: 'all',
@@ -182,29 +182,29 @@ function decode(string: string | null, type: Value['type']): Value {
             };
         case 'Array':
             return {
-                type: 'Array' as const,
+                type: 'Array' as 'Array',
                 value: decodeArray(string),
             };
         case 'Number': {
             if (string === null || string === '') {
                 return {
-                    type: 'Number' as const,
+                    type: 'Number' as 'Number',
                     value: null,
                 };
             }
             const number = parseFloat(string);
             return {
-                type: 'Number' as const,
+                type: 'Number' as 'Number',
                 value: isNaN(number) ? null : number,
             };
         }
         default:
         case 'String':
             if (string === null || string === '') {
-                return {type: 'String' as const, value: null};
+                return {type: 'String' as 'String', value: null};
             }
             return {
-                type: 'String' as const,
+                type: 'String' as 'String',
                 value: string,
             };
     }
