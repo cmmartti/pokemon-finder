@@ -41,7 +41,7 @@
         "react-enroute": "^2.0.0",
         "react-scripts": "^2.1.8",
         "react-select": "^2.4.4",
-        "sanitize.css": "^8.0.1",
+        "sanitize.css": "^10.0.0",
         "typescript": "^3.5.2",
         "urql": "^1.1.3"
     },
