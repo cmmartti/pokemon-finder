@@ -132,7 +132,7 @@ function decode(string: string | null, type: Value['type']): Value {
                 const match = string.match(/^(has|sw|eq)~(.*)$/);
                 if (match)
                     return {
-                        type: 'StringMatch' as 'StringMatch,
+                        type: 'StringMatch' as 'StringMatch',
                         value: {
                             string: match[2],
                             match: match[1] as 'has' | 'sw' | 'eq',
@@ -140,7 +140,7 @@ function decode(string: string | null, type: Value['type']): Value {
                     };
             }
             return {
-                type: 'StringMatch' as 'StringMatch,
+                type: 'StringMatch' as 'StringMatch',
                 value: {
                     string: null,
                     match: 'has',
